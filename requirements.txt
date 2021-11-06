@@ -1,0 +1,11 @@
+certifi==2021.10.8
+charset-normalizer==2.0.7
+docutils==0.18
+idna==3.3
+Kivy==2.0.0
+Kivy-Garden==0.1.4
+kivymd @ https://github.com/kivymd/KivyMD/archive/master.zip
+Pillow==8.4.0
+Pygments==2.10.0
+requests==2.26.0
+urllib3==1.26.7
