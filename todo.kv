@@ -1,0 +1,143 @@
+<Task>:
+    task_checkbox: task_checkbox
+    task_input_field: task_input_field
+    make_imp_btn: make_imp_btn
+    canvas:
+        Color:
+            rgba: 0, 0.31, 0.88, 0.7
+        RoundedRectangle:
+            radius: [(10, 10), (10, 10), (10, 10), (10, 10)]
+            pos: self.pos
+            size: self.size
+    orientation: "horizontal"
+    AnchorLayout:
+        anchor_x: "center"
+        anchor_y: "center"
+        size_hint: 0.1, 1
+        MDCheckbox:
+            size: "58dp", "58dp"
+            selected_color: "#FFFC00"
+            unselected_color: 1, 1, 1, 1
+            on_press: root.mark_done()
+            id: task_checkbox
+
+    AnchorLayout:
+        anchor_x: "center"
+        anchor_y: "center"
+        size_hint: 0.7, 1
+        MDTextField:
+            font_size: self.height // 2.5
+            theme_text_color: 'Custom'
+            line_color_normal: 0, 0.31, 0.88, 0
+            line_color_focus: "#FFF9BA"
+            text_color_normal: 1, 1, 1, 1
+            text_color_focus: "#FFF9BA"
+            id: task_input_field
+    AnchorLayout:
+        anchor_x: "center"
+        anchor_y: "center"
+        size_hint: 0.1, 1
+        MDIconButton:
+            icon: 'cards-heart-outline'
+            # icon: 'cards-heart'
+            # text_color: "#FF0000"
+            theme_text_color: 'Custom'
+            text_color: "#FFFFFF"
+            on_press: root.make_important()
+            id: make_imp_btn
+    AnchorLayout:
+        anchor_x: "center"
+        anchor_y: "center"
+        size_hint: 0.1, 1
+        MDIconButton:
+            icon: 'delete'
+            theme_text_color: 'Custom'
+            text_color: 1, 1, 1, 1
+            on_press: root.delete_task()
+            id: delete_btn
+
+
+<MenuButton>:
+    anchor_x: "left"
+    size_hint: 1, 0.1
+    text_color: 1, 0.99, 1, 1
+    line_color: 1, 1, 1, 0
+    icon_color: 1, 1, 1, 1
+    underline_color: 1, 1, 1, 1
+    on_press: self.change_screen()
+
+
+<MainContainer>:
+    screen_manager: screen_manager
+    important_button: important_button
+    tasks_button: tasks_button
+    my_day_button: my_day_button
+    MDBoxLayout:
+        size_hint: 0.3, 1
+        orientation: "vertical"
+        MDBoxLayout:
+            size_hint: 1, 0.2
+            md_bg_color: 0.31, 0.31, 0.31, 1
+            orientation: "vertical"
+            MDLabel:
+                halign: "left"
+                valign: "bottom"
+                text: "Username"
+                color: 1, 1, 1, 1
+            MDLabel:
+                valign: "top"
+                halign: "left"
+                text: "E-mail"
+                color: 1, 1, 1, 1
+        MDBoxLayout:
+            md_bg_color: 0.31, 0.31, 0.31, 1
+            orientation: "vertical"
+            MenuButton:
+                id: tasks_button
+                icon: "home"
+                text: "Задачи"
+            MenuButton:
+                id: important_button
+                icon: "cards-heart"
+                text: "Важно"
+            MenuButton:
+                id: my_day_button
+                icon: "calendar"
+                text: "Мой день"
+        MDBoxLayout:
+            size_hint: 1, 0.1
+            md_bg_color: 0.31, 0.31, 0.31, 1
+            position: "right"
+            MDIconButton:
+                icon: "cog"
+                md_bg_color: 1, 1, 1, 1
+    ScreenManager:
+        id: screen_manager
+
+
+<TasksScreen>:
+    tasks: tasks
+    ScrollView:
+        size: self.size
+        do_scroll_y: True
+        GridLayout:
+            id: tasks
+            padding: 5, 0
+            cols: 1
+            spacing: 15
+            orientation: "bt-lr"
+            row_default_height: 80
+            size_hint_y: None
+            height: self.minimum_height
+    AnchorLayout:
+        anchor_x: "right"
+        anchor_y: "bottom"
+        size_hint: 0.98, 0.98
+        pos_hint: {'y': 0.02}
+        MDIconButton:
+            icon: "plus"
+            md_bg_color: rgba(128, 166, 255, 255)
+            theme_text_color: 'Custom'
+            text_color: 1, 1, 1, 1
+            user_font_size: "45sp"
+            on_press: root.add_task()
