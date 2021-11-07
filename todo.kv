@@ -66,6 +66,8 @@
     underline_color: 1, 1, 1, 1
     on_press: self.change_screen()
 
+<ButtonToSettingsMenu>:
+    on_press: self.change_screen()
 
 <MainContainer>:
     screen_manager: screen_manager
@@ -73,6 +75,7 @@
     tasks_button: tasks_button
     my_day_button: my_day_button
     settings_button: settings_button
+
     MDBoxLayout:
         size_hint: 0.3, 1
         orientation: "vertical"
@@ -109,7 +112,7 @@
             size_hint: 1, 0.1
             md_bg_color: 0.31, 0.31, 0.31, 1
             position: "right"
-            MDIconButton:
+            ButtonToSettingsMenu:
                 id: settings_button
                 icon: "cog"
                 md_bg_color: 1, 1, 1, 1

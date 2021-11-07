@@ -57,7 +57,6 @@ class Task(BoxLayout):
     task_checkbox: MDCheckbox = ObjectProperty()
     task_input_field: MDTextField = ObjectProperty()
     make_imp_btn: MDIconButton = ObjectProperty()
-    # Вадим
     '''
     Класс задачи
     '''
@@ -83,6 +82,28 @@ class Task(BoxLayout):
     def mark_done(self):
         self.is_done = not self.is_done
 
+
+class SettingsMenu(Screen):
+    #Вадим
+    pass
+
+class ButtonToSettingsMenu(MDIconButton):
+    #Вадим
+    button_to_settings_menu : MDIconButton = ObjectProperty()
+    def __init__(self, screen_name=None, **kwargs):
+        super().__init__(**kwargs)
+        if screen_name:
+            self.set_screen_name(screen_name)
+
+    # Эту функцию прописываем в kv-файле в on_press
+    def change_screen(self):
+        app: TodoApp = MDApp.get_running_app()
+        main_container: MainContainer = app.get_main_container()
+        manager: ScreenManager = main_container.get_screen_manager()
+        manager.current = self.screen_name
+
+    def set_screen_name(self, screen_name):
+        self.screen_name = screen_name
 
 class MenuButton(MDRectangleFlatIconButton):
     '''
@@ -131,6 +152,8 @@ class MainContainer(BoxLayout):
     important_button: MenuButton = ObjectProperty()
     home_button: MenuButton = ObjectProperty()
     my_day_button: MenuButton = ObjectProperty()
+    settings_button: ButtonToSettingsMenu = ObjectProperty()
+
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -141,6 +164,7 @@ class MainContainer(BoxLayout):
         self.important_button.set_screen_name("important")
         self.tasks_button.set_screen_name("tasks")
         self.my_day_button.set_screen_name("my_day")
+        self.settings_button.set_screen_name("settings_menu")
 
         # self.load_tasks()
         self.screen_manager.transition = NoTransition()
@@ -150,6 +174,7 @@ class MainContainer(BoxLayout):
         self.screen_manager.add_widget(TasksScreen(name="important"))
         self.screen_manager.add_widget(TasksScreen(name="tasks"))
         self.screen_manager.add_widget(TasksScreen(name="my_day"))
+        self.screen_manager.add_widget(TasksScreen(name="settings_menu"))
         self.screen_manager.current = "tasks"
 
     def load_tasks(self):
