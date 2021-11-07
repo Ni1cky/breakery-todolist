@@ -26,8 +26,7 @@ class TasksScreen(Screen):
             task.id = new_id
             self.tasks.add_widget(task)
             return
-        if not new_id:
-            new_id = 0
+
         self.tasks.add_widget(Task(id=new_id))
 
     def get_tasks(self):
@@ -47,12 +46,11 @@ class Task(BoxLayout):
     Класс задачи
     '''
 
-    def __init__(self, **kwargs):
+    def __init__(self, id=0, **kwargs):
         super().__init__()  # **kwargs)
 
-        self.id = 0
-        if 'id' in kwargs:
-            self.id = int(kwargs['id'])
+        self.id = id
+
 
         self.task_text = ''
         if 'task_text' in kwargs:
@@ -171,11 +169,6 @@ class MainContainer(BoxLayout):
                 cur_scr: TasksScreen = self.screen_manager.get_screen(scr)
                 cur_scr.add_task(new_task)
 
-            # if i["is_done"]:
-            #     new_task.mark_done()
-            # if i["is_important"]:
-            #     new_task.make_important()
-            # self.tasks_screen.add_task(new_task)
 
 
     def save_tasks(self):
