@@ -1,5 +1,6 @@
 import json
 import os
+
 from kivy.uix.gridlayout import GridLayout
 from kivymd.uix.button import MDIconButton, MDRectangleFlatIconButton
 from kivymd.uix.selectioncontrol import MDCheckbox
@@ -8,7 +9,7 @@ from constants import *
 from kivymd.app import MDApp
 from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.screenmanager import Screen, ScreenManager, NoTransition
+from kivy.uix.screenmanager import NoTransition, Screen, ScreenManager
 from kivy.uix.stacklayout import StackLayout
 
 
@@ -20,10 +21,14 @@ class TasksScreen(Screen):
         self.tasks.remove_widget(task)
 
     def add_task(self, task=None):
+        new_id = len(self.tasks.children)
         if task:
+            task.id = new_id
             self.tasks.add_widget(task)
             return
-        self.tasks.add_widget(Task())
+        if not new_id:
+            new_id = 0
+        self.tasks.add_widget(Task(id=new_id))
 
     def get_tasks(self):
         return [task for task in self.tasks.children]
@@ -43,11 +48,18 @@ class Task(BoxLayout):
     '''
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__()  # **kwargs)
+
+        self.id = 0
+        if 'id' in kwargs:
+            self.id = int(kwargs['id'])
+
+        self.task_text = ''
         if 'task_text' in kwargs:
             self.task_text = kwargs['task_text']
-        if 'task_name' in kwargs:
-            self.task_name = kwargs['task_name']
+
+        self.task_text = self.get_text()
+
         self.is_done = False
         self.is_important = False
 
@@ -63,6 +75,9 @@ class Task(BoxLayout):
     def mark_done(self):
         self.is_done = not self.is_done
 
+    def get_text(self):
+        return self.task_input_field.text
+
 
 class MenuButton(MDRectangleFlatIconButton):
     # Макс
@@ -71,7 +86,7 @@ class MenuButton(MDRectangleFlatIconButton):
     '''
 
     def __init__(self, screen_name=None, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__()  # **kwargs)
         if screen_name:
             self.set_screen_name(screen_name)
 
@@ -114,7 +129,7 @@ class MainContainer(BoxLayout):
     my_day_button: MenuButton = ObjectProperty()
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__()  # **kwargs)
         self.SAVE_NAME = SAVE_NAME
         self.SAVE_FOLDER = SAVE_FOLDER
         self.SAVE_PATH = SAVE_PATH
@@ -123,7 +138,6 @@ class MainContainer(BoxLayout):
         self.tasks_button.set_screen_name("tasks")
         self.my_day_button.set_screen_name("my_day")
 
-        # self.load_tasks()
         self.screen_manager.transition = NoTransition()
         self.load_tasks_screens()
 
@@ -135,32 +149,54 @@ class MainContainer(BoxLayout):
 
     def load_tasks(self):
         # Денис
+
+        if not os.path.exists(self.SAVE_FOLDER) or os.listdir(self.SAVE_FOLDER) == []:
+            return
+
         with open(self.SAVE_PATH, "r") as f:
             save = json.load(f)
-        cur_save: dict = save[self.SAVE_NAME]
-        for i in cur_save.values():
-            new_task = Task(task_name=i["name"])
-            if i["is_done"]:
-                new_task.mark_done()
-            if i["is_important"]:
-                new_task.make_important()
-            self.tasks_screen.add_task(new_task)
+
+        save: dict = save[self.SAVE_NAME]
+
+        for scr in save.keys():
+
+            tasks: dict = save[scr]
+
+            for id, task in tasks.items():
+                new_task = Task(id=id, task_text=task["text"])
+                if task["is_done"]:
+                    new_task.mark_done()
+                if task["is_important"]:
+                    new_task.make_important()
+                cur_scr: TasksScreen = self.screen_manager.get_screen(scr)
+                cur_scr.add_task(new_task)
+
+            # if i["is_done"]:
+            #     new_task.mark_done()
+            # if i["is_important"]:
+            #     new_task.make_important()
+            # self.tasks_screen.add_task(new_task)
+
 
     def save_tasks(self):
         # Денис
         if not os.path.exists(self.SAVE_FOLDER):
             os.mkdir(self.SAVE_FOLDER)
 
-        tasks = self.tasks_screen.get_tasks()
+        screens = self.screen_manager.screens
 
         data = {self.SAVE_NAME: {}}
         cur_save = data[self.SAVE_NAME]
-        for task in tasks:
-            cur_task = cur_save[task.task_name] = {}
-            cur_task["name"] = task.task_name
-            cur_task["text"] = task.task_text
-            cur_task["is_done"] = task.is_done
-            cur_task["is_important"] = task.is_important
+        for scr in screens:
+            scr: TasksScreen
+            cur_scr = cur_save[scr.name] = {}
+
+            for task in scr.get_tasks():
+                task: Task
+                cur_task = cur_scr[task.id] = {}
+                cur_task["text"] = task.task_text
+                cur_task["is_done"] = task.is_done
+                cur_task["is_important"] = task.is_important
 
         with open(self.SAVE_PATH, 'w') as f:
             json.dump(data, f)
@@ -173,6 +209,12 @@ class TodoApp(MDApp):
     def build(self):
         self.main_container = MainContainer()
         return self.main_container
+
+    def on_start(self):
+        self.main_container.load_tasks()
+
+    def on_stop(self):
+        self.main_container.save_tasks()
 
     def get_main_container(self):
         return self.main_container
