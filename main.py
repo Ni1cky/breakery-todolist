@@ -12,6 +12,26 @@ from kivy.uix.screenmanager import Screen, ScreenManager, NoTransition
 from kivy.uix.stacklayout import StackLayout
 
 
+class SettingsScreen(Screen):
+    tasks: GridLayout = ObjectProperty()
+
+    def delete_task(self, task):
+        self.tasks.remove_widget(task)
+
+    def add_task(self, task=None):
+        if task:
+            self.tasks.add_widget(task)
+            return
+        self.tasks.add_widget(Task())
+
+    def get_tasks(self):
+        return [task for task in self.tasks.children]
+
+    def import_tasks(self, tasks):
+        for task in tasks:
+            self.add_task(task)
+
+
 class TasksScreen(Screen):
     # Макс, Коля
     tasks: GridLayout = ObjectProperty()
@@ -65,7 +85,6 @@ class Task(BoxLayout):
 
 
 class MenuButton(MDRectangleFlatIconButton):
-    # Макс
     '''
     Класс кнопки, меняющей экран
     '''
