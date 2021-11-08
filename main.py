@@ -2,6 +2,7 @@ import json
 import os
 from kivy.uix.gridlayout import GridLayout
 from kivymd.uix.button import MDIconButton, MDRectangleFlatIconButton
+from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.textfield import MDTextField
 from constants import *
@@ -10,26 +11,6 @@ from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import Screen, ScreenManager, NoTransition
 from kivy.uix.stacklayout import StackLayout
-
-
-class SettingsScreen(Screen):
-    tasks: GridLayout = ObjectProperty()
-
-    def delete_task(self, task):
-        self.tasks.remove_widget(task)
-
-    def add_task(self, task=None):
-        if task:
-            self.tasks.add_widget(task)
-            return
-        self.tasks.add_widget(Task())
-
-    def get_tasks(self):
-        return [task for task in self.tasks.children]
-
-    def import_tasks(self, tasks):
-        for task in tasks:
-            self.add_task(task)
 
 
 class TasksScreen(Screen):
@@ -84,12 +65,41 @@ class Task(BoxLayout):
 
 
 class SettingsMenu(Screen):
-    #Вадим
-    pass
+    def __init__(self, **kw):
+        super().__init__(**kw)
+        menu_items = [
+            {
+                "text": "темная",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda x="темная": self.menu_callback(x)
+            },
+            {
+                "text": "светлая",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda x="светлая": self.menu_callback(x)
+            },
+            {
+                "text": "бурая",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda x="бурая": self.menu_callback(x)
+            }
+        ]
+        TodoApp.menu = MDDropdownMenu(
+            caller=self.ids.button,
+            items=menu_items,
+            width_mult=3,
+        )
+
+    def menu_callback(self, text_item):
+        # функция, которая вызывается при наатии
+        # print(text_item)
+        pass
+
 
 class ButtonToSettingsMenu(MDIconButton):
     #Вадим
     button_to_settings_menu : MDIconButton = ObjectProperty()
+
     def __init__(self, screen_name=None, **kwargs):
         super().__init__(**kwargs)
         if screen_name:
@@ -104,6 +114,7 @@ class ButtonToSettingsMenu(MDIconButton):
 
     def set_screen_name(self, screen_name):
         self.screen_name = screen_name
+
 
 class MenuButton(MDRectangleFlatIconButton):
     '''
@@ -154,7 +165,6 @@ class MainContainer(BoxLayout):
     my_day_button: MenuButton = ObjectProperty()
     settings_button: ButtonToSettingsMenu = ObjectProperty()
 
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.SAVE_NAME = SAVE_NAME
@@ -174,7 +184,7 @@ class MainContainer(BoxLayout):
         self.screen_manager.add_widget(TasksScreen(name="important"))
         self.screen_manager.add_widget(TasksScreen(name="tasks"))
         self.screen_manager.add_widget(TasksScreen(name="my_day"))
-        self.screen_manager.add_widget(TasksScreen(name="settings_menu"))
+        self.screen_manager.add_widget(SettingsMenu(name="settings_menu"))
         self.screen_manager.current = "tasks"
 
     def load_tasks(self):
