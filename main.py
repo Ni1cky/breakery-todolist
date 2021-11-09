@@ -143,7 +143,7 @@ class MainContainer(BoxLayout):
     def load_tasks(self):
         # Денис
 
-        if not os.path.exists(self.SAVE_FOLDER) or os.listdir(self.SAVE_FOLDER) == []:
+        if not os.path.exists(self.SAVE_FOLDER) or os.listdir(self.SAVE_FOLDER) == [".gitignore"]:
             return
 
         with open(self.SAVE_PATH, "r") as f:
