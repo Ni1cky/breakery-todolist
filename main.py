@@ -14,7 +14,6 @@ from kivymd.app import MDApp
 from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import Screen, ScreenManager, NoTransition
-from kivy.uix.stacklayout import StackLayout
 
 
 class TasksScreen(Screen):
@@ -78,7 +77,7 @@ class MenuButton(OneLineIconListItem):
     def __init__(self, screen_name=None, **kwargs):
         super().__init__(**kwargs)
         if screen_name:
-            self.set_screen_name(screen_name)
+            self.screen_name = screen_name
 
     # Эту функцию прописываем в kv-файле в on_press
     def change_screen(self):
@@ -86,9 +85,6 @@ class MenuButton(OneLineIconListItem):
         main_container: MainContainer = app.get_main_container()
         manager: ScreenManager = main_container.get_screen_manager()
         manager.current = self.screen_name
-
-    def set_screen_name(self, screen_name):
-        self.screen_name = screen_name
 
 
 class LowerMenuLayout(MDBoxLayout):
@@ -101,8 +97,9 @@ class LowerMenuLayout(MDBoxLayout):
 
 class UpperMenuLayout(MDBoxLayout):
     ''' Тут верхняя часть меню '''
-    pass
-
+    important_button: MenuButton = ObjectProperty()
+    home_button: MenuButton = ObjectProperty()
+    my_day_button: MenuButton = ObjectProperty()
 
 class ScrollViewTasksList(ScrollView):
     '''список задач'''
@@ -111,28 +108,30 @@ class ScrollViewTasksList(ScrollView):
 
 
 class MainMenuLayout(MDBoxLayout):
-    # Макс
     '''
     Всё меню
     '''
-    pass
+    upper: UpperMenuLayout = ObjectProperty()
+    lower: LowerMenuLayout = ObjectProperty()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        # print(self.parent)
+        # print(self.children)
 
 
 class MainContainer(BoxLayout):
     screen_manager: ScreenManager = ObjectProperty()
-    important_button: MenuButton = ObjectProperty()
-    home_button: MenuButton = ObjectProperty()
-    my_day_button: MenuButton = ObjectProperty()
+    main_menu: MainMenuLayout = ObjectProperty()
 
     def __init__(self, **kwargs):
+        print("YA TUT")
         super().__init__(**kwargs)
+        print("YA TUT")
         self.SAVE_NAME = SAVE_NAME
         self.SAVE_FOLDER = SAVE_FOLDER
         self.SAVE_PATH = SAVE_PATH
-
-        self.important_button.set_screen_name("important")
-        self.tasks_button.set_screen_name("tasks")
-        self.my_day_button.set_screen_name("my_day")
 
         # self.load_tasks()
         self.screen_manager.transition = NoTransition()

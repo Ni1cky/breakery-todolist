@@ -75,6 +75,10 @@
         icon:"plus"
 
 <UpperMenuLayout>:
+    #important_button: important_button
+    #tasks_button: tasks_button
+    #my_day_button: my_day_button
+
     orientation: "vertical"
     padding: "8dp"
     spacing: "8dp"
@@ -92,19 +96,24 @@
         height: self.texture_size[1]
     MenuButton:
         id: tasks_button
+        screen_name: "tasks"
         icon: "home"
         text: "Задачи"
     MenuButton:
         id: important_button
+        screen_name: "important"
         icon: "cards-heart"
         text: "Важно"
     MenuButton:
         id: my_day_button
+        screen_name: "my_day"
         icon: "calendar"
         text: "Мой день"
+
 <MainMenuLayout>:
+    upper: upper
+    lower: lower
     MDBoxLayout:
-        size_hint: 0.2, 1
         md_bg_color: 0, 0, 1, 1
         padding: 3
         MDFillRoundFlatButton:
@@ -115,20 +124,25 @@
             size_hint: 0.5, 0.1
             on_press: nav_bar.set_state("open")
     MDNavigationDrawer:
+        orientation: "vertical"
         halign: "top"
         md_bg_color: 1,1,1,1
         id: nav_bar
         opacity: 0
         UpperMenuLayout:
+            id: upper
         LowerMenuLayout:
+            id: lower
 
 <MainContainer>:
     screen_manager: screen_manager
-    important_button: important_button
-    tasks_button: tasks_button
-    my_day_button: my_day_button
+    main_menu: main_menu
+
     MainMenuLayout:
+        size_hint: 0.1, 1
+        id: main_menu
     ScreenManager:
+        size_hint: 0.9, 1
         id: screen_manager
 
 
