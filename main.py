@@ -1,7 +1,12 @@
 import json
 import os
+from abc import ABC
+
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.scrollview import ScrollView
+from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDIconButton, MDRectangleFlatIconButton
+from kivymd.uix.list import OneLineIconListItem
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.textfield import MDTextField
 from constants import *
@@ -64,7 +69,7 @@ class Task(BoxLayout):
         self.is_done = not self.is_done
 
 
-class MenuButton(MDRectangleFlatIconButton):
+class MenuButton(OneLineIconListItem):
     # Макс
     '''
     Класс кнопки, меняющей экран
@@ -86,7 +91,7 @@ class MenuButton(MDRectangleFlatIconButton):
         self.screen_name = screen_name
 
 
-class LowerMenuLayout(StackLayout):
+class LowerMenuLayout(MDBoxLayout):
     # Макс
     '''
     Нижняя часть меню
@@ -94,12 +99,18 @@ class LowerMenuLayout(StackLayout):
     pass
 
 
-class UpperMenuLayout(StackLayout):
+class UpperMenuLayout(MDBoxLayout):
     ''' Тут верхняя часть меню '''
     pass
 
 
-class MainMenuLayout(BoxLayout):
+class ScrollViewTasksList(ScrollView):
+    '''список задач'''
+    def add_new_list(self):
+        pass
+
+
+class MainMenuLayout(MDBoxLayout):
     # Макс
     '''
     Всё меню
