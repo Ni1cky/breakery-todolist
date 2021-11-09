@@ -147,43 +147,6 @@
     MainMenuLayout:
         size_hint: 0.1, 1
         id: main_menu
-<MainContainer>:
-    screen_manager: screen_manager
-    important_button: important_button
-    tasks_button: tasks_button
-    my_day_button: my_day_button
-    MDBoxLayout:
-        size_hint: 0.3, 1
-        orientation: "vertical"
-        MDBoxLayout:
-            size_hint: 1, 0.2
-            md_bg_color: 0.31, 0.31, 0.31, 1
-            orientation: "vertical"
-            MDLabel:
-                halign: "left"
-                valign: "bottom"
-                text: "Username"
-                color: 1, 1, 1, 1
-            MDLabel:
-                valign: "top"
-                halign: "left"
-                text: "E-mail"
-                color: 1, 1, 1, 1
-        MDBoxLayout:
-            md_bg_color: 0.31, 0.31, 0.31, 1
-            orientation: "vertical"
-            MenuButton:
-                id: tasks_button
-                icon: "home"
-                text: "Задачи"
-            MenuButton:
-                id: important_button
-                icon: "cards-heart"
-                text: "Важно"
-            MenuButton:
-                id: my_day_button
-                icon: "calendar"
-                text: "Мой день"
     ScreenManager:
         size_hint: 0.9, 1
         id: screen_manager

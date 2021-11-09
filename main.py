@@ -177,16 +177,11 @@ class MainContainer(BoxLayout):
     main_menu: MainMenuLayout = ObjectProperty()
 
     def __init__(self, **kwargs):
-        print("YA TUT")
         super().__init__(**kwargs)
-        print("YA TUT")
         self.SAVE_NAME = SAVE_NAME
         self.SAVE_FOLDER = SAVE_FOLDER
         self.SAVE_PATH = SAVE_PATH
 
-        self.important_button.set_screen_name("important")
-        self.tasks_button.set_screen_name("tasks")
-        self.my_day_button.set_screen_name("my_day")
         # self.load_tasks()
         self.screen_manager.transition = NoTransition()
         self.load_tasks_screens()
