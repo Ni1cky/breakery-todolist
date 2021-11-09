@@ -72,16 +72,11 @@
     underline_color: 1, 1, 1, 1
     on_press: self.change_screen()
 
-<ButtonToSettingsMenu>:
-    on_press: self.change_screen()
-
 <MainContainer>:
     screen_manager: screen_manager
     important_button: important_button
     tasks_button: tasks_button
     my_day_button: my_day_button
-    settings_button: settings_button
-
     MDBoxLayout:
         size_hint: 0.3, 1
         orientation: "vertical"
@@ -114,14 +109,6 @@
                 id: my_day_button
                 icon: "calendar"
                 text: "Мой день"
-        MDBoxLayout:
-            size_hint: 1, 0.1
-            md_bg_color: 0.31, 0.31, 0.31, 1
-            position: "right"
-            ButtonToSettingsMenu:
-                id: settings_button
-                icon: "cog"
-                md_bg_color: 1, 1, 1, 1
     ScreenManager:
         id: screen_manager
 
@@ -133,7 +120,7 @@
         spacing: 15
         MDToolbar:
             icon: "git"
-            right_action_items: [["magnify", root.search_task], ["sort", root.sort_task], ["dots-vertical", root.dots_task]]
+            right_action_items: [["magnify", root.search_task], ["sort", root.sort_task], ["cog", root.open_settings]]
             left_action_items: [["menu", root.open_menu]]
 
         ScrollView:

@@ -45,6 +45,12 @@ class TasksScreen(Screen):
     def open_menu(self, instance):
         pass
 
+    def open_settings(self, instance):
+        app: TodoApp = MDApp.get_running_app()
+        main_container: MainContainer = app.get_main_container()
+        manager: ScreenManager = main_container.get_screen_manager()
+        manager.current = "settings_menu"
+
 
 class Task(BoxLayout):
     task_checkbox: MDCheckbox = ObjectProperty()
@@ -108,26 +114,6 @@ class SettingsMenu(Screen):
         pass
 
 
-class ButtonToSettingsMenu(MDIconButton):
-    #Вадим
-    button_to_settings_menu: MDIconButton = ObjectProperty()
-
-    def __init__(self, screen_name=None, **kwargs):
-        super().__init__(**kwargs)
-        if screen_name:
-            self.set_screen_name(screen_name)
-
-    # Эту функцию прописываем в kv-файле в on_press
-    def change_screen(self):
-        app: TodoApp = MDApp.get_running_app()
-        main_container: MainContainer = app.get_main_container()
-        manager: ScreenManager = main_container.get_screen_manager()
-        manager.current = self.screen_name
-
-    def set_screen_name(self, screen_name):
-        self.screen_name = screen_name
-
-
 class MenuButton(MDRectangleFlatIconButton):
     '''
     Класс кнопки, меняющей экран
@@ -175,7 +161,6 @@ class MainContainer(BoxLayout):
     important_button: MenuButton = ObjectProperty()
     home_button: MenuButton = ObjectProperty()
     my_day_button: MenuButton = ObjectProperty()
-    settings_button: ButtonToSettingsMenu = ObjectProperty()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -186,8 +171,6 @@ class MainContainer(BoxLayout):
         self.important_button.set_screen_name("important")
         self.tasks_button.set_screen_name("tasks")
         self.my_day_button.set_screen_name("my_day")
-        self.settings_button.set_screen_name("settings_menu")
-
         # self.load_tasks()
         self.screen_manager.transition = NoTransition()
         self.load_tasks_screens()
@@ -233,6 +216,10 @@ class MainContainer(BoxLayout):
 
     def get_screen_manager(self):
         return self.screen_manager
+
+
+
+
 
 
 class TodoApp(MDApp):
