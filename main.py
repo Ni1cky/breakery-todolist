@@ -46,17 +46,11 @@ class Task(BoxLayout):
     Класс задачи
     '''
 
-    def __init__(self, id=0, **kwargs):
-        super().__init__()  # **kwargs)
-
+    def __init__(self, id=0, task_text="", **kwargs):
+        super().__init__(**kwargs)
         self.id = id
 
-
-        self.task_text = ''
-        if 'task_text' in kwargs:
-            self.task_text = kwargs['task_text']
-
-        self.task_text = self.get_text()
+        self.task_input_field.text = task_text
 
         self.is_done = False
         self.is_important = False
@@ -84,7 +78,7 @@ class MenuButton(MDRectangleFlatIconButton):
     '''
 
     def __init__(self, screen_name=None, **kwargs):
-        super().__init__()  # **kwargs)
+        super().__init__(**kwargs)
         if screen_name:
             self.set_screen_name(screen_name)
 
@@ -127,7 +121,7 @@ class MainContainer(BoxLayout):
     my_day_button: MenuButton = ObjectProperty()
 
     def __init__(self, **kwargs):
-        super().__init__()  # **kwargs)
+        super().__init__(**kwargs)
         self.SAVE_NAME = SAVE_NAME
         self.SAVE_FOLDER = SAVE_FOLDER
         self.SAVE_PATH = SAVE_PATH
@@ -169,8 +163,6 @@ class MainContainer(BoxLayout):
                 cur_scr: TasksScreen = self.screen_manager.get_screen(scr)
                 cur_scr.add_task(new_task)
 
-
-
     def save_tasks(self):
         # Денис
         if not os.path.exists(self.SAVE_FOLDER):
@@ -187,7 +179,7 @@ class MainContainer(BoxLayout):
             for task in scr.get_tasks():
                 task: Task
                 cur_task = cur_scr[task.id] = {}
-                cur_task["text"] = task.task_text
+                cur_task["text"] = task.get_text()
                 cur_task["is_done"] = task.is_done
                 cur_task["is_important"] = task.is_important
 
