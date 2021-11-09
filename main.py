@@ -33,6 +33,18 @@ class TasksScreen(Screen):
         for task in tasks:
             self.add_task(task)
 
+    def search_task(self, instance):
+        pass
+
+    def sort_task(self, instance):
+        pass
+
+    def dots_task(self, instance):
+        pass
+
+    def open_menu(self, instance):
+        pass
+
 
 class Task(BoxLayout):
     task_checkbox: MDCheckbox = ObjectProperty()
@@ -98,7 +110,7 @@ class SettingsMenu(Screen):
 
 class ButtonToSettingsMenu(MDIconButton):
     #Вадим
-    button_to_settings_menu : MDIconButton = ObjectProperty()
+    button_to_settings_menu: MDIconButton = ObjectProperty()
 
     def __init__(self, screen_name=None, **kwargs):
         super().__init__(**kwargs)

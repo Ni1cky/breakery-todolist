@@ -128,18 +128,26 @@
 
 <TasksScreen>:
     tasks: tasks
-    ScrollView:
-        size: self.size
-        do_scroll_y: True
-        GridLayout:
-            id: tasks
-            padding: 5, 0
-            cols: 1
-            spacing: 15
-            orientation: "bt-lr"
-            row_default_height: 80
-            size_hint_y: None
-            height: self.minimum_height
+    BoxLayout:
+        orientation: "vertical"
+        spacing: 15
+        MDToolbar:
+            icon: "git"
+            right_action_items: [["magnify", root.search_task], ["sort", root.sort_task], ["dots-vertical", root.dots_task]]
+            left_action_items: [["menu", root.open_menu]]
+
+        ScrollView:
+            size: self.size
+            do_scroll_y: True
+            GridLayout:
+                id: tasks
+                padding: 5, 0
+                cols: 1
+                spacing: 15
+                orientation: "bt-lr"
+                row_default_height: 80
+                size_hint_y: None
+                height: self.minimum_height
     AnchorLayout:
         anchor_x: "right"
         anchor_y: "bottom"
