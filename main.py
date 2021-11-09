@@ -1,12 +1,12 @@
 import json
 import os
-from abc import ABC
 
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDIconButton, MDRectangleFlatIconButton
 from kivymd.uix.list import OneLineIconListItem
+from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.textfield import MDTextField
 from constants import *
@@ -36,12 +36,29 @@ class TasksScreen(Screen):
         for task in tasks:
             self.add_task(task)
 
+    def search_task(self, instance):
+        pass
+
+    def sort_task(self, instance):
+        pass
+
+    def dots_task(self, instance):
+        pass
+
+    def open_menu(self, instance):
+        pass
+
+    def open_settings(self, instance):
+        app: TodoApp = MDApp.get_running_app()
+        main_container: MainContainer = app.get_main_container()
+        manager: ScreenManager = main_container.get_screen_manager()
+        manager.current = "settings_menu"
+
 
 class Task(BoxLayout):
     task_checkbox: MDCheckbox = ObjectProperty()
     task_input_field: MDTextField = ObjectProperty()
     make_imp_btn: MDIconButton = ObjectProperty()
-    # Вадим
     '''
     Класс задачи
     '''
@@ -68,8 +85,40 @@ class Task(BoxLayout):
         self.is_done = not self.is_done
 
 
+
+class SettingsMenu(Screen):
+    def __init__(self, **kw):
+        super().__init__(**kw)
+        menu_items = [
+            {
+                "text": "темная",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda x="темная": self.menu_callback(x)
+            },
+            {
+                "text": "светлая",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda x="светлая": self.menu_callback(x)
+            },
+            {
+                "text": "бурая",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda x="бурая": self.menu_callback(x)
+            }
+        ]
+        TodoApp.menu = MDDropdownMenu(
+            caller=self.ids.button,
+            items=menu_items,
+            width_mult=3,
+        )
+
+    def menu_callback(self, text_item):
+        # функция, которая вызывается при наатии
+        # print(text_item)
+        pass
+
+
 class MenuButton(OneLineIconListItem):
-    # Макс
     '''
     Класс кнопки, меняющей экран
     '''
@@ -135,6 +184,9 @@ class MainContainer(BoxLayout):
         self.SAVE_FOLDER = SAVE_FOLDER
         self.SAVE_PATH = SAVE_PATH
 
+        self.important_button.set_screen_name("important")
+        self.tasks_button.set_screen_name("tasks")
+        self.my_day_button.set_screen_name("my_day")
         # self.load_tasks()
         self.screen_manager.transition = NoTransition()
         self.load_tasks_screens()
@@ -143,6 +195,7 @@ class MainContainer(BoxLayout):
         self.screen_manager.add_widget(TasksScreen(name="important"))
         self.screen_manager.add_widget(TasksScreen(name="tasks"))
         self.screen_manager.add_widget(TasksScreen(name="my_day"))
+        self.screen_manager.add_widget(SettingsMenu(name="settings_menu"))
         self.screen_manager.current = "tasks"
 
     def load_tasks(self):
@@ -179,6 +232,10 @@ class MainContainer(BoxLayout):
 
     def get_screen_manager(self):
         return self.screen_manager
+
+
+
+
 
 
 class TodoApp(MDApp):
