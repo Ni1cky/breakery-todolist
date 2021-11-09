@@ -101,8 +101,10 @@ class UpperMenuLayout(MDBoxLayout):
     home_button: MenuButton = ObjectProperty()
     my_day_button: MenuButton = ObjectProperty()
 
+
 class ScrollViewTasksList(ScrollView):
     '''список задач'''
+
     def add_new_list(self):
         pass
 
