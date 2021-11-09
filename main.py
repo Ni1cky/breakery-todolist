@@ -66,6 +66,7 @@ class Task(BoxLayout):
 
     def mark_done(self):
         self.is_done = not self.is_done
+        self.task_checkbox.active = self.is_done
 
     def get_text(self):
         return self.task_input_field.text
