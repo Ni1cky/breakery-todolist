@@ -36,8 +36,23 @@ class TasksScreen(Screen):
     def search_task(self, instance):
         pass
 
+    def delete_all_tasks(self):
+        #Вадим
+        for i in self.get_tasks():
+            self.delete_task(i)
+
     def sort_task(self, instance):
-        pass
+        #Вадим
+        # SORT ALFABET
+        new_tasks_text = sorted([task.get_task_text() for task in self.get_tasks()])
+        new_tasks = []
+        for label in new_tasks_text:
+            for task in self.get_tasks():
+                if task.get_task_text() == label:
+                    new_tasks.append(task)
+
+        self.delete_all_tasks()
+        self.import_tasks(new_tasks[::-1])
 
     def dots_task(self, instance):
         pass
@@ -80,6 +95,9 @@ class Task(BoxLayout):
 
     def mark_done(self):
         self.is_done = not self.is_done
+
+    def get_task_text(self):
+        return self.task_input_field.text
 
 
 class SettingsMenu(Screen):
