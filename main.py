@@ -224,8 +224,6 @@ class MainContainer(MDBoxLayout):
         self.SAVE_FOLDER = SAVE_FOLDER
         self.SAVE_PATH = SAVE_PATH
 
-        # self.load_tasks()
-
         self.screen_manager.transition = NoTransition()
         self.load_tasks_screens()
 
@@ -266,7 +264,7 @@ class MainContainer(MDBoxLayout):
         if (
                 not os.path.exists(self.SAVE_FOLDER) or
                 os.listdir(self.SAVE_FOLDER) == [".gitignore"] or
-                self.SAVE_PATH not in os.listdir(self.SAVE_FOLDER)
+                f"{self.SAVE_NAME}.json" not in os.listdir(self.SAVE_FOLDER)
         ):
             return
 
