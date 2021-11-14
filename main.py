@@ -17,6 +17,11 @@ from kivy.uix.stacklayout import StackLayout
 class TasksScreen(Screen):
     # Макс, Коля
     tasks: GridLayout = ObjectProperty()
+    search_text_field = ObjectProperty()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.saved_tasks = []
 
     def delete_task(self, task):
         self.tasks.remove_widget(task)
@@ -34,8 +39,19 @@ class TasksScreen(Screen):
         for task in tasks:
             self.add_task(task)
 
-    def search_task(self, instance):
-        pass
+    def search_task(self, *args):
+        #Вадим
+        search = self.search_text_field.text
+        if search != '':
+            if not self.saved_tasks:
+                self.saved_tasks = self.get_tasks()
+            self.delete_all_tasks()
+            for task in self.saved_tasks:
+                if search in task.get_task_text():
+                    self.add_task(task)
+        else:
+            self.delete_all_tasks()
+            self.import_tasks(self.saved_tasks)
 
     def delete_all_tasks(self):
         #Вадим
@@ -54,9 +70,6 @@ class TasksScreen(Screen):
 
         self.delete_all_tasks()
         self.import_tasks(new_tasks[::-1])
-
-    def dots_task(self, instance):
-        pass
 
     def open_menu(self, instance):
         pass
