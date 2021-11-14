@@ -53,12 +53,14 @@ class TasksScreen(Screen):
             if not self.saved_tasks:
                 self.saved_tasks = self.get_tasks()
             self.delete_all_tasks()
+
             for task in self.saved_tasks:
                 if search in task.get_task_text():
                     self.add_task(task)
         else:
             self.delete_all_tasks()
             self.import_tasks(self.saved_tasks)
+            self.saved_tasks = []
 
     def delete_all_tasks(self):
         #Вадим
