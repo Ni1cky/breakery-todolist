@@ -56,79 +56,124 @@
             on_press: root.delete_task()
             id: delete_btn
 
+<ScrollViewTasksList>:
+    ScrollView:
+<SettingsMenu>:
+    MDRaisedButton:
+        id: button
+        text: "PRESS ME"
+        pos_hint: {"center_x": .5, "center_y": .5}
+        on_release: app.menu.open()
 
 <MenuButton>:
-    anchor_x: "left"
-    size_hint: 1, 0.1
-    text_color: 1, 0.99, 1, 1
-    line_color: 1, 1, 1, 0
-    icon_color: 1, 1, 1, 1
-    underline_color: 1, 1, 1, 1
+    theme_text_color: "Custom"
+    text_color: 0, 0, 0, 1
     on_press: self.change_screen()
+    IconLeftWidgetWithoutTouch:
+        theme_text_color: "Custom"
+        text_color: 0, 0, 0, 1
 
+
+<LowerMenuLayout>:
+    ScrollViewTasksList:
+    MDIconButton:
+	    on_press: root.children[0].add_new_list()
+        icon:"plus"
+
+<UpperMenuLayout>:
+    #important_button: important_button
+    #tasks_button: tasks_button
+    #my_day_button: my_day_button
+
+    orientation: "vertical"
+    padding: "8dp"
+    spacing: "8dp"
+    MDLabel:
+        text: "ToDo List"
+        font_style: "Button"
+        font_size: 20
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    MDLabel:
+        text: "Авторы: Nicky, !!!, GOGX31, VadLord, RegreTTO, dion, Хитрый Страус"
+        font_style: "Caption"
+        size_hint_y: None
+        height: self.texture_size[1]
+    MenuButton:
+        id: tasks_button
+        screen_name: "tasks"
+        icon: "home"
+        text: "Задачи"
+    MenuButton:
+        id: important_button
+        screen_name: "important"
+        icon: "cards-heart"
+        text: "Важно"
+    MenuButton:
+        id: my_day_button
+        screen_name: "my_day"
+        icon: "calendar"
+        text: "Мой день"
+
+<MainMenuLayout>:
+    upper: upper
+    lower: lower
+    MDBoxLayout:
+        md_bg_color: 0, 0, 1, 1
+        padding: 3
+        MDFillRoundFlatButton:
+            md_bg_color: 1, 1, 1, 1
+            text: "MENU"
+            theme_text_color: "Custom"
+            text_color: 0, 0, 1, 1
+            size_hint: 0.5, 0.1
+            on_press: nav_bar.set_state("open")
+    MDNavigationDrawer:
+        orientation: "vertical"
+        halign: "top"
+        md_bg_color: 1,1,1,1
+        id: nav_bar
+        opacity: 0
+        UpperMenuLayout:
+            id: upper
+        LowerMenuLayout:
+            id: lower
 
 <MainContainer>:
     screen_manager: screen_manager
-    important_button: important_button
-    tasks_button: tasks_button
-    my_day_button: my_day_button
-    MDBoxLayout:
-        size_hint: 0.3, 1
-        orientation: "vertical"
-        MDBoxLayout:
-            size_hint: 1, 0.2
-            md_bg_color: 0.31, 0.31, 0.31, 1
-            orientation: "vertical"
-            MDLabel:
-                halign: "left"
-                valign: "bottom"
-                text: "Username"
-                color: 1, 1, 1, 1
-            MDLabel:
-                valign: "top"
-                halign: "left"
-                text: "E-mail"
-                color: 1, 1, 1, 1
-        MDBoxLayout:
-            md_bg_color: 0.31, 0.31, 0.31, 1
-            orientation: "vertical"
-            MenuButton:
-                id: tasks_button
-                icon: "home"
-                text: "Задачи"
-            MenuButton:
-                id: important_button
-                icon: "cards-heart"
-                text: "Важно"
-            MenuButton:
-                id: my_day_button
-                icon: "calendar"
-                text: "Мой день"
-        MDBoxLayout:
-            size_hint: 1, 0.1
-            md_bg_color: 0.31, 0.31, 0.31, 1
-            position: "right"
-            MDIconButton:
-                icon: "cog"
-                md_bg_color: 1, 1, 1, 1
+    main_menu: main_menu
+
+    MainMenuLayout:
+        size_hint: 0.1, 1
+        id: main_menu
     ScreenManager:
+        size_hint: 0.9, 1
         id: screen_manager
 
 
 <TasksScreen>:
     tasks: tasks
-    ScrollView:
-        size: self.size
-        do_scroll_y: True
-        GridLayout:
-            id: tasks
-            padding: 5, 0
-            cols: 1
-            spacing: 15
-            orientation: "bt-lr"
-            row_default_height: 80
-            size_hint_y: None
-            height: self.minimum_height
+    BoxLayout:
+        orientation: "vertical"
+        spacing: 15
+        MDToolbar:
+            icon: "git"
+            right_action_items: [["magnify", root.search_task], ["sort", root.sort_task], ["cog", root.open_settings]]
+            left_action_items: [["menu", root.open_menu]]
+
+        ScrollView:
+            size: self.size
+            do_scroll_y: True
+            GridLayout:
+                id: tasks
+                padding: 5, 0
+                cols: 1
+                spacing: 15
+                orientation: "bt-lr"
+                row_default_height: 80
+                size_hint_y: None
+                height: self.minimum_height
     AnchorLayout:
         anchor_x: "right"
         anchor_y: "bottom"

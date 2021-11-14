@@ -2,7 +2,11 @@ import json
 import os
 
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.scrollview import ScrollView
+from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDIconButton, MDRectangleFlatIconButton
+from kivymd.uix.list import OneLineIconListItem
+from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.textfield import MDTextField
 from constants import *
@@ -11,6 +15,7 @@ from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import NoTransition, Screen, ScreenManager
 from kivy.uix.stacklayout import StackLayout
+from kivy.uix.screenmanager import Screen, ScreenManager, NoTransition
 
 
 class TasksScreen(Screen):
@@ -36,12 +41,29 @@ class TasksScreen(Screen):
         for task in tasks:
             self.add_task(task)
 
+    def search_task(self, instance):
+        pass
+
+    def sort_task(self, instance):
+        pass
+
+    def dots_task(self, instance):
+        pass
+
+    def open_menu(self, instance):
+        pass
+
+    def open_settings(self, instance):
+        app: TodoApp = MDApp.get_running_app()
+        main_container: MainContainer = app.get_main_container()
+        manager: ScreenManager = main_container.get_screen_manager()
+        manager.current = "settings_menu"
+
 
 class Task(BoxLayout):
     task_checkbox: MDCheckbox = ObjectProperty()
     task_input_field: MDTextField = ObjectProperty()
     make_imp_btn: MDIconButton = ObjectProperty()
-    # Вадим
     '''
     Класс задачи
     '''
@@ -72,8 +94,40 @@ class Task(BoxLayout):
         return self.task_input_field.text
 
 
-class MenuButton(MDRectangleFlatIconButton):
-    # Макс
+
+class SettingsMenu(Screen):
+    def __init__(self, **kw):
+        super().__init__(**kw)
+        menu_items = [
+            {
+                "text": "темная",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda x="темная": self.menu_callback(x)
+            },
+            {
+                "text": "светлая",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda x="светлая": self.menu_callback(x)
+            },
+            {
+                "text": "бурая",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda x="бурая": self.menu_callback(x)
+            }
+        ]
+        TodoApp.menu = MDDropdownMenu(
+            caller=self.ids.button,
+            items=menu_items,
+            width_mult=3,
+        )
+
+    def menu_callback(self, text_item):
+        # функция, которая вызывается при наатии
+        # print(text_item)
+        pass
+
+
+class MenuButton(OneLineIconListItem):
     '''
     Класс кнопки, меняющей экран
     '''
@@ -81,7 +135,7 @@ class MenuButton(MDRectangleFlatIconButton):
     def __init__(self, screen_name=None, **kwargs):
         super().__init__(**kwargs)
         if screen_name:
-            self.set_screen_name(screen_name)
+            self.screen_name = screen_name
 
     # Эту функцию прописываем в kv-файле в on_press
     def change_screen(self):
@@ -90,11 +144,8 @@ class MenuButton(MDRectangleFlatIconButton):
         manager: ScreenManager = main_container.get_screen_manager()
         manager.current = self.screen_name
 
-    def set_screen_name(self, screen_name):
-        self.screen_name = screen_name
 
-
-class LowerMenuLayout(StackLayout):
+class LowerMenuLayout(MDBoxLayout):
     # Макс
     '''
     Нижняя часть меню
@@ -102,24 +153,37 @@ class LowerMenuLayout(StackLayout):
     pass
 
 
-class UpperMenuLayout(StackLayout):
+class UpperMenuLayout(MDBoxLayout):
     ''' Тут верхняя часть меню '''
-    pass
+    important_button: MenuButton = ObjectProperty()
+    home_button: MenuButton = ObjectProperty()
+    my_day_button: MenuButton = ObjectProperty()
 
 
-class MainMenuLayout(BoxLayout):
-    # Макс
+class ScrollViewTasksList(ScrollView):
+    '''список задач'''
+
+    def add_new_list(self):
+        pass
+
+
+class MainMenuLayout(MDBoxLayout):
     '''
     Всё меню
     '''
-    pass
+    upper: UpperMenuLayout = ObjectProperty()
+    lower: LowerMenuLayout = ObjectProperty()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        # print(self.parent)
+        # print(self.children)
 
 
 class MainContainer(BoxLayout):
     screen_manager: ScreenManager = ObjectProperty()
-    important_button: MenuButton = ObjectProperty()
-    home_button: MenuButton = ObjectProperty()
-    my_day_button: MenuButton = ObjectProperty()
+    main_menu: MainMenuLayout = ObjectProperty()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -127,9 +191,8 @@ class MainContainer(BoxLayout):
         self.SAVE_FOLDER = SAVE_FOLDER
         self.SAVE_PATH = SAVE_PATH
 
-        self.important_button.set_screen_name("important")
-        self.tasks_button.set_screen_name("tasks")
-        self.my_day_button.set_screen_name("my_day")
+        # self.load_tasks()
+
 
         self.screen_manager.transition = NoTransition()
         self.load_tasks_screens()
@@ -138,6 +201,7 @@ class MainContainer(BoxLayout):
         self.screen_manager.add_widget(TasksScreen(name="important"))
         self.screen_manager.add_widget(TasksScreen(name="tasks"))
         self.screen_manager.add_widget(TasksScreen(name="my_day"))
+        self.screen_manager.add_widget(SettingsMenu(name="settings_menu"))
         self.screen_manager.current = "tasks"
 
     def load_tasks(self):
@@ -178,6 +242,8 @@ class MainContainer(BoxLayout):
         data = {self.SAVE_NAME: {}}
         cur_save = data[self.SAVE_NAME]
         for scr in screens:
+            if not scr is TasksScreen:
+                continue
             scr: TasksScreen
             cur_scr = cur_save[scr.name] = {}
 
@@ -193,6 +259,10 @@ class MainContainer(BoxLayout):
 
     def get_screen_manager(self):
         return self.screen_manager
+
+
+
+
 
 
 class TodoApp(MDApp):
