@@ -1,29 +1,39 @@
 import json
 import os
-
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDIconButton, MDRectangleFlatIconButton
+from kivymd.uix.button import MDIconButton
 from kivymd.uix.list import OneLineIconListItem
 from kivymd.uix.menu import MDDropdownMenu
+from kivymd.uix.navigationdrawer import MDNavigationDrawer
+from kivymd.uix.screen import MDScreen
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.textfield import MDTextField
 from constants import *
 from kivymd.app import MDApp
 from kivy.properties import ObjectProperty
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.screenmanager import NoTransition, Screen, ScreenManager
-from kivy.uix.stacklayout import StackLayout
-from kivy.uix.screenmanager import Screen, ScreenManager, NoTransition
+from kivy.uix.screenmanager import ScreenManager, NoTransition
 
 
-class TasksScreen(Screen):
-    # Макс, Коля
+def get_screen_manager():
+    return MDApp.get_running_app().get_main_container().get_screen_manager()
+
+
+class TasksScreen(MDScreen):
     tasks: GridLayout = ObjectProperty()
 
-    def delete_task(self, task):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.all_tasks = []
+
+    def delete_task(self, task, delete_from_presaved=False):
         self.tasks.remove_widget(task)
+        if delete_from_presaved:
+            self.all_tasks.remove(task)
+
+    def get_tasktext_for_searching(self):
+        return MDApp.get_running_app().get_main_container().toolbar.search_text_field.text
 
     def add_task(self, task=None):
         new_id = len(self.tasks.children)
@@ -41,26 +51,39 @@ class TasksScreen(Screen):
         for task in tasks:
             self.add_task(task)
 
-    def search_task(self, instance):
-        pass
+    def search_task(self):
+        if not self.all_tasks:
+            self.all_tasks = self.get_tasks()
 
-    def sort_task(self, instance):
-        pass
+        self.delete_all_tasks()
 
-    def dots_task(self, instance):
-        pass
+        search = self.get_task_for_searching()
+        if search != '':
+            for task in self.all_tasks:
+                if search in task.get_task_text():
+                    self.add_task(task)
+        else:
+            self.import_tasks(self.all_tasks)
+            self.all_tasks = []
 
-    def open_menu(self, instance):
-        pass
+    def delete_all_tasks(self):
+        for i in self.get_tasks():
+            self.delete_task(i)
 
-    def open_settings(self, instance):
-        app: TodoApp = MDApp.get_running_app()
-        main_container: MainContainer = app.get_main_container()
-        manager: ScreenManager = main_container.get_screen_manager()
-        manager.current = "settings_menu"
+    def sort_tasks(self):
+        # SORT ALFABET
+        new_tasks_text = sorted([task.get_task_text() for task in self.get_tasks()])
+        new_tasks = []
+        for label in new_tasks_text:
+            for task in self.get_tasks():
+                if task.get_task_text() == label:
+                    new_tasks.append(task)
+
+        self.delete_all_tasks()
+        self.import_tasks(new_tasks[::-1])
 
 
-class Task(BoxLayout):
+class Task(MDBoxLayout):
     task_checkbox: MDCheckbox = ObjectProperty()
     task_input_field: MDTextField = ObjectProperty()
     make_imp_btn: MDIconButton = ObjectProperty()
@@ -78,10 +101,8 @@ class Task(BoxLayout):
         self.is_important = False
 
     def delete_task(self):
-        app = MDApp.get_running_app()
-        main_container = app.get_main_container()
-        screen_manager = main_container.get_screen_manager()
-        screen_manager.get_screen(screen_manager.current).delete_task(self)
+        screen_manager: ScreenManager = get_screen_manager()
+        screen_manager.current_screen.delete_task(self, delete_from_presaved=True)
 
     def make_important(self):
         self.is_important = not self.is_important
@@ -93,11 +114,13 @@ class Task(BoxLayout):
     def get_text(self):
         return self.task_input_field.text
 
+    def get_task_text(self):
+        return self.task_input_field.text
 
 
-class SettingsMenu(Screen):
-    def __init__(self, **kw):
-        super().__init__(**kw)
+class SettingsScreen(MDScreen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         menu_items = [
             {
                 "text": "темная",
@@ -127,6 +150,22 @@ class SettingsMenu(Screen):
         pass
 
 
+class ToolBar(MDBoxLayout):
+    search_text_field: MDTextField = ObjectProperty()
+
+    def open_menu(self):
+        pass
+
+    def open_settings(self):
+        pass
+
+    def sort_tasks(self):
+        pass
+
+    def search_task(self):
+        pass
+
+
 class MenuButton(OneLineIconListItem):
     '''
     Класс кнопки, меняющей экран
@@ -137,16 +176,12 @@ class MenuButton(OneLineIconListItem):
         if screen_name:
             self.screen_name = screen_name
 
-    # Эту функцию прописываем в kv-файле в on_press
     def change_screen(self):
-        app: TodoApp = MDApp.get_running_app()
-        main_container: MainContainer = app.get_main_container()
-        manager: ScreenManager = main_container.get_screen_manager()
+        manager: ScreenManager = get_screen_manager()
         manager.current = self.screen_name
 
 
 class LowerMenuLayout(MDBoxLayout):
-    # Макс
     '''
     Нижняя часть меню
     '''
@@ -154,36 +189,34 @@ class LowerMenuLayout(MDBoxLayout):
 
 
 class UpperMenuLayout(MDBoxLayout):
-    ''' Тут верхняя часть меню '''
-    important_button: MenuButton = ObjectProperty()
-    home_button: MenuButton = ObjectProperty()
-    my_day_button: MenuButton = ObjectProperty()
+    '''
+    Тут верхняя часть меню
+    '''
+    pass
 
 
 class ScrollViewTasksList(ScrollView):
-    '''список задач'''
+    '''
+    Cписок задач
+    '''
 
     def add_new_list(self):
         pass
 
 
-class MainMenuLayout(MDBoxLayout):
+class MainMenuLayout(MDNavigationDrawer):
     '''
     Всё меню
     '''
     upper: UpperMenuLayout = ObjectProperty()
     lower: LowerMenuLayout = ObjectProperty()
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        # print(self.parent)
-        # print(self.children)
+    nav_bar: MDNavigationDrawer = ObjectProperty()
 
 
-class MainContainer(BoxLayout):
+class MainContainer(MDBoxLayout):
     screen_manager: ScreenManager = ObjectProperty()
     main_menu: MainMenuLayout = ObjectProperty()
+    toolbar: ToolBar = ObjectProperty()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -193,7 +226,6 @@ class MainContainer(BoxLayout):
 
         # self.load_tasks()
 
-
         self.screen_manager.transition = NoTransition()
         self.load_tasks_screens()
 
@@ -201,12 +233,36 @@ class MainContainer(BoxLayout):
         self.screen_manager.add_widget(TasksScreen(name="important"))
         self.screen_manager.add_widget(TasksScreen(name="tasks"))
         self.screen_manager.add_widget(TasksScreen(name="my_day"))
-        self.screen_manager.add_widget(SettingsMenu(name="settings_menu"))
+        self.screen_manager.add_widget(SettingsScreen(name="settings_menu"))
         self.screen_manager.current = "tasks"
 
-    def load_tasks(self):
-        # Денис
+    def open_menu(self, instance=None):
+        self.main_menu.nav_bar.set_state("open")
 
+    def sort_tasks(self, instance=None):
+        if not isinstance(self.screen_manager.current_screen, TasksScreen):
+            return
+        cur_screen: TasksScreen = self.screen_manager.current_screen
+        cur_screen.sort_tasks()
+
+    def search_task(self, instance=None):
+        if not isinstance(self.screen_manager.current_screen, TasksScreen):
+            return
+        cur_screen: TasksScreen = self.screen_manager.current_screen
+        cur_screen.search_task()
+
+    def open_settings(self, instance=None):
+        self.screen_manager.current = "settings_menu"
+
+    def open_screen_properly(self):
+        if isinstance(self.screen_manager.current_screen, TasksScreen):
+            for item in self.toolbar.children[0].ids.right_actions.children[1:]:
+                item.text_color = "#FFFFFF"
+        else:
+            for item in self.toolbar.children[0].ids.right_actions.children[1:]:
+                item.text_color = "#646464"
+
+    def load_tasks(self):
         if (
                 not os.path.exists(self.SAVE_FOLDER) or
                 os.listdir(self.SAVE_FOLDER) == [".gitignore"] or
@@ -233,7 +289,6 @@ class MainContainer(BoxLayout):
                 cur_scr.add_task(new_task)
 
     def save_tasks(self):
-        # Денис
         if not os.path.exists(self.SAVE_FOLDER):
             os.mkdir(self.SAVE_FOLDER)
 
@@ -242,7 +297,7 @@ class MainContainer(BoxLayout):
         data = {self.SAVE_NAME: {}}
         cur_save = data[self.SAVE_NAME]
         for scr in screens:
-            if not scr is TasksScreen:
+            if not isinstance(scr, TasksScreen):
                 continue
             scr: TasksScreen
             cur_scr = cur_save[scr.name] = {}
@@ -259,10 +314,6 @@ class MainContainer(BoxLayout):
 
     def get_screen_manager(self):
         return self.screen_manager
-
-
-
-
 
 
 class TodoApp(MDApp):

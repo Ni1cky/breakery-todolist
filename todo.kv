@@ -20,7 +20,6 @@
             unselected_color: 1, 1, 1, 1
             on_press: root.mark_done()
             id: task_checkbox
-
     AnchorLayout:
         anchor_x: "center"
         anchor_y: "center"
@@ -58,18 +57,21 @@
 
 <ScrollViewTasksList>:
     ScrollView:
-<SettingsMenu>:
+
+<SettingsScreen>:
     MDRaisedButton:
         id: button
-        text: "PRESS ME"
+        text: "Выбор цветовой темы"
         pos_hint: {"center_x": .5, "center_y": .5}
         on_release: app.menu.open()
 
 <MenuButton>:
     theme_text_color: "Custom"
     text_color: 0, 0, 0, 1
+    icn: ""
     on_press: self.change_screen()
     IconLeftWidgetWithoutTouch:
+        icon: root.icn
         theme_text_color: "Custom"
         text_color: 0, 0, 0, 1
 
@@ -81,10 +83,6 @@
         icon:"plus"
 
 <UpperMenuLayout>:
-    #important_button: important_button
-    #tasks_button: tasks_button
-    #my_day_button: my_day_button
-
     orientation: "vertical"
     padding: "8dp"
     spacing: "8dp"
@@ -103,77 +101,102 @@
     MenuButton:
         id: tasks_button
         screen_name: "tasks"
-        icon: "home"
+        icn: "home"
         text: "Задачи"
     MenuButton:
         id: important_button
         screen_name: "important"
-        icon: "cards-heart"
+        icn: "cards-heart"
         text: "Важно"
     MenuButton:
         id: my_day_button
         screen_name: "my_day"
-        icon: "calendar"
+        icn: "calendar"
         text: "Мой день"
 
 <MainMenuLayout>:
     upper: upper
     lower: lower
-    MDBoxLayout:
-        md_bg_color: 0, 0, 1, 1
-        padding: 3
-        MDFillRoundFlatButton:
-            md_bg_color: 1, 1, 1, 1
-            text: "MENU"
-            theme_text_color: "Custom"
-            text_color: 0, 0, 1, 1
-            size_hint: 0.5, 0.1
-            on_press: nav_bar.set_state("open")
-    MDNavigationDrawer:
-        orientation: "vertical"
-        halign: "top"
-        md_bg_color: 1,1,1,1
-        id: nav_bar
-        opacity: 0
-        UpperMenuLayout:
-            id: upper
-        LowerMenuLayout:
-            id: lower
+    nav_bar: nav_bar
+    orientation: "vertical"
+    halign: "top"
+    md_bg_color: 1, 1, 1, 1
+    state: "close"
+    id: nav_bar
+    UpperMenuLayout:
+        id: upper
+    LowerMenuLayout:
+        id: lower
 
 <MainContainer>:
     screen_manager: screen_manager
     main_menu: main_menu
+    toolbar: toolbar
+    orientation: "vertical"
+    ToolBar:
+        id: toolbar
+        size_hint_y: 64 / root.height
+        open_menu: root.open_menu
+        search_task: root.search_task
+        sort_tasks: root.sort_tasks
+        open_settings: root.open_settings
+    MDNavigationLayout:
+        ScreenManager:
+            on_current: root.open_screen_properly()
+            id: screen_manager
+        MainMenuLayout:
+            id: main_menu
 
-    MainMenuLayout:
-        size_hint: 0.1, 1
-        id: main_menu
-    ScreenManager:
-        size_hint: 0.9, 1
-        id: screen_manager
+<ToolBar>:
+    search_text_field: search_text_field
+    MDToolbar:
+        size_hint_x: 0.45
+        left_action_items: [["menu", root.open_menu]]
+        theme_text_color: "Custom"
+        icon_left_color: 1, 0, 0, 1
+    AnchorLayout:
+        size_hint_x: 0.3
+        canvas:
+            Color:
+                rgba: 0.129, 0.588, 0.953, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        anchor_x: "center"
+        anchor_y: "top"
+        MDTextField:
+            id: search_text_field
+            theme_text_color: 'Custom'
+            color_active: 0.129, 0.588, 0.953, 1
+            mode: "fill"
+            fill_color_normal: 0.129, 0.588, 0.953, 1
+            fill_color_focus: 0.129, 0.588, 0.953, 1
+            text_color_normal: 1, 1, 1, 1
+            text_color_focus: 1, 1, 1, 1
+            font_size: self.height // 2.9
+            line_color_focus: 1, 1, 1, 1
+            hint_text: "Найти задачу"
+            hint_text_color_normal: 1, 1, 1, 1
+            on_text: root.search_task()
+    MDToolbar:
+        size_hint_x: 0.25
+        right_action_items: [["magnify"], ["sort", root.sort_tasks], ["cog", root.open_settings]]
 
 
 <TasksScreen>:
     tasks: tasks
-    BoxLayout:
-        orientation: "vertical"
-        spacing: 15
-        MDToolbar:
-            icon: "git"
-            right_action_items: [["magnify", root.search_task], ["sort", root.sort_task], ["cog", root.open_settings]]
-            left_action_items: [["menu", root.open_menu]]
-
-        ScrollView:
-            size: self.size
-            do_scroll_y: True
-            GridLayout:
-                id: tasks
-                padding: 5, 0
-                cols: 1
-                spacing: 15
-                orientation: "bt-lr"
-                row_default_height: 80
-                size_hint_y: None
-                height: self.minimum_height
+    ScrollView:
+        size: self.size
+        do_scroll_y: True
+        GridLayout:
+            id: tasks
+            padding: 5, 5
+            cols: 1
+            spacing: 10
+            orientation: "bt-lr"
+            row_default_height: 80
+            size_hint_y: None
+            height: self.minimum_height
     AnchorLayout:
         anchor_x: "right"
         anchor_y: "bottom"
