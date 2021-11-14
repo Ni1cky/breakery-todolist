@@ -30,7 +30,8 @@ class TasksScreen(MDScreen):
     def delete_task(self, task, delete_from_presaved=False):
         self.tasks.remove_widget(task)
         if delete_from_presaved:
-            self.all_tasks.remove(task)
+            if task in self.all_tasks:
+                self.all_tasks.remove(task)
 
     def get_tasktext_for_searching(self):
         return MDApp.get_running_app().get_main_container().toolbar.search_text_field.text
