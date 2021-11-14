@@ -118,16 +118,7 @@
 <MainMenuLayout>:
     upper: upper
     lower: lower
-    MDBoxLayout:
-        md_bg_color: 0, 0, 1, 1
-        padding: 3
-        MDFillRoundFlatButton:
-            md_bg_color: 1, 1, 1, 1
-            text: "MENU"
-            theme_text_color: "Custom"
-            text_color: 0, 0, 1, 1
-            size_hint: 0.5, 0.1
-            on_press: nav_bar.set_state("open")
+    # on_press: nav_bar.set_state("open")
     MDNavigationDrawer:
         orientation: "vertical"
         halign: "top"
@@ -142,7 +133,9 @@
 <MainContainer>:
     screen_manager: screen_manager
     main_menu: main_menu
-
+    orientation: "vertical"
+    ToolBar:
+        size_hint_y: 64 / root.height
     MainMenuLayout:
         size_hint: 0.1, 1
         id: main_menu
@@ -150,46 +143,47 @@
         size_hint: 0.9, 1
         id: screen_manager
 
+<ToolBar>:
+    search_text_field: search_text_field
+    MDToolbar:
+        size_hint_x: 0.45
+        # left_action_items: [["menu", root.open_menu]]
+        left_action_items: [["menu"]]
+    BoxLayout:
+        size_hint_x: 0.3
+        canvas:
+            Color:
+                rgba: 0.129, 0.588, 0.953, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        AnchorLayout:
+            anchor_x: "center"
+            anchor_y: "top"
+            MDTextField:
+                id: search_text_field
+                theme_text_color: 'Custom'
+                color_active: 0.129, 0.588, 0.953, 1
+                mode: "fill"
+                fill_color_normal: 0.129, 0.588, 0.953, 1
+                fill_color_focus: 0.129, 0.588, 0.953, 1
+                text_color_normal: 1, 1, 1, 1
+                text_color_focus: 1, 1, 1, 1
+                font_size: self.height // 2.9
+                line_color_focus: 1, 1, 1, 1
+                hint_text: "Найти задачу"
+                hint_text_color_normal: 1, 1, 1, 1
+                # on_text: root.search_task()
+    MDToolbar:
+        size_hint_x: 0.25
+        #  right_action_items: [["magnify", root.search_task], ["sort", root.sort_task], ["cog", root.open_settings]]
+        right_action_items: [["magnify"], ["sort"], ["cog"]]
+
 <TasksScreen>:
     tasks: tasks
-    search_text_field: search_text_field
     BoxLayout:
         orientation: "vertical"
         spacing: 15
-        BoxLayout:
-            size_hint_y: 64 / root.height
-            MDToolbar:
-                size_hint_x: 0.45
-                left_action_items: [["menu", root.open_menu]]
-            BoxLayout:
-                size_hint_x: 0.3
-                canvas:
-                    Color:
-                        rgba: 0.129, 0.588, 0.953, 1
-                    Rectangle:
-                        pos: self.pos
-                        size: self.size
-                AnchorLayout:
-                    anchor_x: "center"
-                    anchor_y: "top"
-                    MDTextField:
-                        id: search_text_field
-                        theme_text_color: 'Custom'
-                        color_active: 0.129, 0.588, 0.953, 1
-                        mode: "fill"
-                        fill_color_normal: 0.129, 0.588, 0.953, 1
-                        fill_color_focus: 0.129, 0.588, 0.953, 1
-                        text_color_normal: 1, 1, 1, 1
-                        text_color_focus: 1, 1, 1, 1
-                        font_size: self.height // 2.9
-                        line_color_focus: 1, 1, 1, 1
-                        hint_text: "Найти задачу"
-                        hint_text_color_normal: 1, 1, 1, 1
-                        on_text: root.search_task()
-            MDToolbar:
-                size_hint_x: 0.25
-                right_action_items: [["magnify", root.search_task], ["sort", root.sort_task], ["cog", root.open_settings]]
-
         ScrollView:
             size: self.size
             do_scroll_y: True

@@ -9,6 +9,8 @@ from kivymd.uix.list import OneLineIconListItem
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.textfield import MDTextField
+from kivymd.uix.toolbar import MDToolbar
+
 from constants import *
 from kivymd.app import MDApp
 from kivy.properties import ObjectProperty
@@ -159,6 +161,9 @@ class SettingsMenu(Screen):
         # print(text_item)
         pass
 
+
+class ToolBar(BoxLayout):
+    search_text_field: MDTextField = ObjectProperty()
 
 
 class MenuButton(OneLineIconListItem):
