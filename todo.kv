@@ -57,6 +57,10 @@
 
 <ScrollViewTasksList>:
     ScrollView:
+        MenuButton:
+            text: "list1"
+            icn: "home"
+
 
 <SettingsScreen>:
     MDRaisedButton:
@@ -77,10 +81,18 @@
 
 
 <LowerMenuLayout>:
-    ScrollViewTasksList:
-    MDIconButton:
-	    on_press: root.children[0].add_new_list()
-        icon:"plus"
+    MDBoxLayout:
+        orientation: "vertical"
+        padding: "8dp"
+        spacing: "8dp"
+        ScrollViewTasksList:
+        MDBoxLayout:
+            orientation: "horizontal"
+            MDTextField:
+                hint_text: "Введите название списка"
+            MDIconButton:
+                on_press: root.children[0].children[0].add_new_list()
+                icon:"plus"
 
 <UpperMenuLayout>:
     orientation: "vertical"
@@ -94,7 +106,7 @@
         height: self.texture_size[1]
 
     MDLabel:
-        text: "Авторы: Nicky, !!!, GOGX31, VadLord, RegreTTO, dion, Хитрый Страус"
+        text: "Авторы: Nicky, !!!, GOGX31, vadLord, RegreTTO, dion, Хитрый Страус"
         font_style: "Caption"
         size_hint_y: None
         height: self.texture_size[1]
