@@ -59,7 +59,7 @@ class TasksScreen(MDScreen):
 
         self.delete_all_tasks()
 
-        search = self.get_task_for_searching()
+        search = self.get_tasktext_for_searching()
         if search != '':
             for task in self.all_tasks:
                 if search in task.get_task_text():
