@@ -41,7 +41,6 @@ class TasksManager:
         screen_manager: ScreenManager = get_screen_manager()
         screen_name = screen_name if screen_name else screen_manager.current
         tasks_to_load = [self.copy_task(task.task_id) for task in self.tasks if screen_name in task.belongs_to]
-        tasks_to_load.sort(key=lambda t: t.task_id)
         return tasks_to_load
 
     def copy_task(self, task_id):

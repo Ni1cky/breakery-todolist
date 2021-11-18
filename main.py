@@ -50,8 +50,7 @@ class TasksScreen(MDScreen):
                 return
 
     def get_tasks(self):
-        app: TodoApp = MDApp.get_running_app()
-        return app.get_tasks_manager().get_tasks_for_screen(self.name)
+        return get_tasks_manager().get_tasks_for_screen(self.name)
 
     def import_tasks(self, tasks):
         for task in tasks:
@@ -122,6 +121,13 @@ class Task(MDBoxLayout):
 
     def get_text(self):
         return self.task_input_field.text
+
+    def set_text(self, text):
+        self.task_input_field.text = text
+
+    def change_text(self):
+        tasks_man = get_tasks_manager()
+        tasks_man.tasks[self.task_id].set_text(self.get_text())
 
 
 class SettingsScreen(MDScreen):
