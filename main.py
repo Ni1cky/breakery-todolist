@@ -14,7 +14,7 @@ from constants import *
 from kivymd.app import MDApp
 from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import ScreenManager, NoTransition
-
+from kivymd.uix.stacklayout import MDStackLayout
 
 
 def get_screen_manager():
@@ -187,8 +187,6 @@ class LowerMenuLayout(MDBoxLayout):
     '''
     Нижняя часть меню
     '''
-    pass
-
 
 class UpperMenuLayout(MDBoxLayout):
     '''
@@ -202,8 +200,24 @@ class ScrollViewTasksList(ScrollView):
     Cписок задач
     '''
 
+    new_list_field: MDTextField = ObjectProperty()
+
     def add_new_list(self):
-        pass
+        list_name = self.new_list_field.text
+        screen_name = list_name
+        screen_manager: ScreenManager = get_screen_manager()
+        while screen_name in screen_manager.screen_names:
+            if(screen_name != "" and screen_name[-1].isdigit()):
+                screen_name = screen_name[:-1] + str(int(screen_name[-1]) + 1)
+            else:
+                screen_name+='1'
+        screen_manager.add_widget(TasksScreen(name=screen_name))
+
+        newList = MenuButton(screen_name=screen_name)
+        newList.text = list_name
+        newList.icn = "home"
+        self.children[0].add_widget(newList)
+        print(screen_manager.screen_names)
 
 
 class MainMenuLayout(MDNavigationDrawer):
@@ -233,6 +247,7 @@ class MainContainer(MDBoxLayout):
         self.screen_manager.add_widget(TasksScreen(name="important"))
         self.screen_manager.add_widget(TasksScreen(name="tasks"))
         self.screen_manager.add_widget(TasksScreen(name="my_day"))
+        self.screen_manager.add_widget(TasksScreen(name="test"))
         self.screen_manager.add_widget(SettingsScreen(name="settings_menu"))
         self.screen_manager.current = "tasks"
 
@@ -314,6 +329,8 @@ class MainContainer(MDBoxLayout):
 
     def get_screen_manager(self):
         return self.screen_manager
+
+
 
 
 class TodoApp(MDApp):

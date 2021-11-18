@@ -59,10 +59,14 @@
             id: delete_btn
 
 <ScrollViewTasksList>:
-    ScrollView:
+    size_hint: 2, None
+    MDStackLayout:
+        adaptive_height: True
         MenuButton:
             text: "list1"
             icn: "home"
+            screen_name: "test"
+
 
 
 <SettingsScreen>:
@@ -82,30 +86,21 @@
         theme_text_color: "Custom"
         text_color: 0, 0, 0, 1
 
-
-<LowerMenuLayout>:
-    MDBoxLayout:
-        orientation: "vertical"
-        ScrollViewTasksList:
-        MDBoxLayout:
-            orientation: "horizontal"
-            MDTextField:
-                hint_text: "Введите название списка"
-            MDIconButton:
-                on_press: root.children[0].children[0].add_new_list()
-                icon:"plus"
-
 <UpperMenuLayout>:
     orientation: "vertical"
+    padding: "8dp"
+    spacing: "8dp"
     MDLabel:
         text: "ToDo List"
         font_style: "Button"
         font_size: 20
+        size_hint_y: None
         height: self.texture_size[1]
 
     MDLabel:
-        text: "Авторы: Nicky, !!!, GOGX31, vadLord, RegreTTO, dion, Хитрый Страус"
+        text: "Авторы: Nicky, !!!, GOGX31, VadLord, RegreTTO, dion, Хитрый Страус"
         font_style: "Caption"
+        size_hint_y: None
         height: self.texture_size[1]
     MenuButton:
         id: tasks_button
@@ -123,11 +118,30 @@
         icn: "calendar"
         text: "Мой день"
 
+<LowerMenuLayout>:
+
+    MDBoxLayout:
+        orientation: "vertical"
+        ScrollViewTasksList:
+            new_list_field: new_list_field
+
+        MDBoxLayout:
+            orientation: "horizontal"
+
+            MDTextField:
+                id: new_list_field
+                hint_text: "Введите название списка"
+            MDIconButton:
+                on_press: root.children[0].children[1].add_new_list()
+                icon:"plus"
+
+
 <MainMenuLayout>:
     upper: upper
     lower: lower
     nav_bar: nav_bar
     orientation: "vertical"
+    halign: "top"
     md_bg_color: 1, 1, 1, 1
     state: "close"
     id: nav_bar
