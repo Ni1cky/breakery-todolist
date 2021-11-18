@@ -10,11 +10,12 @@ from kivymd.uix.navigationdrawer import MDNavigationDrawer
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.textfield import MDTextField
+
+from TasksManager import TasksManager
 from constants import *
 from kivymd.app import MDApp
 from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import ScreenManager, NoTransition
-
 
 
 def get_screen_manager():
@@ -28,61 +29,51 @@ class TasksScreen(MDScreen):
         super().__init__(**kwargs)
         self.all_tasks = []
 
-    def delete_task(self, task, delete_from_presaved=False):
-        self.tasks.remove_widget(task)
-        if delete_from_presaved:
-            if task in self.all_tasks:
-                self.all_tasks.remove(task)
-
     def get_tasktext_for_searching(self):
         return MDApp.get_running_app().get_main_container().toolbar.search_text_field.text
 
-    def add_task(self, task=None):
-        new_id = len(self.tasks.children)
-        if task:
-            task.id = new_id
-            self.tasks.add_widget(task)
-            return
-
-        self.tasks.add_widget(Task(id=new_id))
+    def add_task(self, task):
+        self.tasks.add_widget(task)
 
     def get_tasks(self):
-        return [task for task in self.tasks.children]
+        app: TodoApp = MDApp.get_running_app()
+        return app.tasks.get_tasks_for_screen(self.name)
 
     def import_tasks(self, tasks):
         for task in tasks:
             self.add_task(task)
 
     def search_task(self):
-        if not self.all_tasks:
-            self.all_tasks = self.get_tasks()
-
         self.delete_all_tasks()
-
         search = self.get_tasktext_for_searching()
-        if search != '':
-            for task in self.all_tasks:
-                if search in task.get_task_text():
+        if search:
+            for task in self.get_tasks():
+                if search in task.get_text():
                     self.add_task(task)
         else:
-            self.import_tasks(self.all_tasks)
-            self.all_tasks = []
+            self.reload()
 
     def delete_all_tasks(self):
-        for i in self.get_tasks():
-            self.delete_task(i)
+        self.tasks.clear_widgets()
 
     def sort_tasks(self):
         # SORT ALFABET
-        new_tasks_text = sorted([task.get_task_text() for task in self.get_tasks()])
+        new_tasks_text = sorted([task.get_text() for task in self.get_tasks()])
         new_tasks = []
         for label in new_tasks_text:
             for task in self.get_tasks():
-                if task.get_task_text() == label:
+                if task.get_text() == label:
                     new_tasks.append(task)
 
         self.delete_all_tasks()
         self.import_tasks(new_tasks[::-1])
+
+    def reload(self, tasks_to_load=None):
+        if get_screen_manager().current == self.name:
+            if tasks_to_load:
+                self.import_tasks(tasks_to_load)
+                return
+            self.import_tasks(self.get_tasks())
 
 
 class Task(MDBoxLayout):
@@ -93,21 +84,28 @@ class Task(MDBoxLayout):
     Класс задачи
     '''
 
-    def __init__(self, id=0, task_text="", **kwargs):
+    def __init__(self, belongs_to=("tasks", ), task_id=-1, task_text="", **kwargs):
         super().__init__(**kwargs)
-        self.id = id
-
+        self.task_id = task_id
         self.task_input_field.text = task_text
+
+        self.belongs_to = {"tasks"}
+        self.update_parents(belongs_to)
 
         self.is_done = False
         self.is_important = False
 
-    def delete_task(self):
-        screen_manager: ScreenManager = get_screen_manager()
-        screen_manager.current_screen.delete_task(self, delete_from_presaved=True)
+    def update_parents(self, belongs_to):
+        for parent in belongs_to:
+            self.belongs_to.add(parent)
+
+    def delete(self):
+        app: TodoApp = MDApp.get_running_app()
+        app.tasks.delete_task(self.task_id)
 
     def make_important(self):
         self.is_important = not self.is_important
+        self.copy()
 
     def mark_done(self):
         self.is_done = not self.is_done
@@ -116,8 +114,13 @@ class Task(MDBoxLayout):
     def get_text(self):
         return self.task_input_field.text
 
-    def get_task_text(self):
-        return self.task_input_field.text
+    def copy(self):
+        self_copy = Task(task_id=self.task_id, task_text=self.get_text(), belongs_to=self.belongs_to)
+        if self.is_done:
+            self_copy.mark_done()
+        if self.is_important:
+            self_copy.make_important()
+        return self_copy
 
 
 class SettingsScreen(MDScreen):
@@ -280,7 +283,7 @@ class MainContainer(MDBoxLayout):
             tasks: dict = save[scr]
 
             for id, task in tasks.items():
-                new_task = Task(id=id, task_text=task["text"])
+                new_task = Task(task_id=id, task_text=task["text"])
                 if task["is_done"]:
                     new_task.mark_done()
                 if task["is_important"]:
@@ -304,7 +307,7 @@ class MainContainer(MDBoxLayout):
 
             for task in scr.get_tasks():
                 task: Task
-                cur_task = cur_scr[task.id] = {}
+                cur_task = cur_scr[task.task_id] = {}
                 cur_task["text"] = task.get_text()
                 cur_task["is_done"] = task.is_done
                 cur_task["is_important"] = task.is_important
@@ -317,6 +320,11 @@ class MainContainer(MDBoxLayout):
 
 
 class TodoApp(MDApp):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.tasks = TasksManager()
+        self.main_container = None
+
     def build(self):
         self.main_container = MainContainer()
         return self.main_container
