@@ -17,6 +17,7 @@ from kivy.uix.screenmanager import ScreenManager, NoTransition
 from kivymd.uix.stacklayout import MDStackLayout
 
 
+
 def get_screen_manager():
     return MDApp.get_running_app().get_main_container().get_screen_manager()
 
