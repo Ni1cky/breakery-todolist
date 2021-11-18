@@ -10,8 +10,7 @@ from kivymd.uix.navigationdrawer import MDNavigationDrawer
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.textfield import MDTextField
-
-from TasksManager import TasksManager
+import tasks_manager
 from constants import *
 from kivymd.app import MDApp
 from kivy.properties import ObjectProperty
@@ -20,6 +19,10 @@ from kivy.uix.screenmanager import ScreenManager, NoTransition
 
 def get_screen_manager():
     return MDApp.get_running_app().get_main_container().get_screen_manager()
+
+
+def get_tasks_manager():
+    return MDApp.get_running_app().get_tasks_manager()
 
 
 class TasksScreen(MDScreen):
@@ -32,12 +35,23 @@ class TasksScreen(MDScreen):
     def get_tasktext_for_searching(self):
         return MDApp.get_running_app().get_main_container().toolbar.search_text_field.text
 
+    def add_new_task(self):
+        tasks_man: tasks_manager.TasksManager = get_tasks_manager()
+        tasks_man.create_new_task()
+        self.add_task(tasks_man.get_task(len(tasks_man.tasks) - 1))
+
     def add_task(self, task):
         self.tasks.add_widget(task)
 
+    def delete_task(self, task_id):
+        for task in self.tasks.children:
+            if task.task_id == task_id:
+                self.tasks.remove_widget(task)
+                return
+
     def get_tasks(self):
         app: TodoApp = MDApp.get_running_app()
-        return app.tasks.get_tasks_for_screen(self.name)
+        return app.get_tasks_manager().get_tasks_for_screen(self.name)
 
     def import_tasks(self, tasks):
         for task in tasks:
@@ -68,11 +82,9 @@ class TasksScreen(MDScreen):
         self.delete_all_tasks()
         self.import_tasks(new_tasks[::-1])
 
-    def reload(self, tasks_to_load=None):
+    def reload(self):
         if get_screen_manager().current == self.name:
-            if tasks_to_load:
-                self.import_tasks(tasks_to_load)
-                return
+            self.delete_all_tasks()
             self.import_tasks(self.get_tasks())
 
 
@@ -84,13 +96,12 @@ class Task(MDBoxLayout):
     Класс задачи
     '''
 
-    def __init__(self, belongs_to=("tasks", ), task_id=-1, task_text="", **kwargs):
+    def __init__(self, task_id=-1, task_text="", **kwargs):
         super().__init__(**kwargs)
         self.task_id = task_id
         self.task_input_field.text = task_text
 
-        self.belongs_to = {"tasks"}
-        self.update_parents(belongs_to)
+        self.belongs_to = {"tasks", }
 
         self.is_done = False
         self.is_important = False
@@ -100,12 +111,10 @@ class Task(MDBoxLayout):
             self.belongs_to.add(parent)
 
     def delete(self):
-        app: TodoApp = MDApp.get_running_app()
-        app.tasks.delete_task(self.task_id)
+        get_tasks_manager().delete_task(self.task_id)
 
     def make_important(self):
         self.is_important = not self.is_important
-        self.copy()
 
     def mark_done(self):
         self.is_done = not self.is_done
@@ -113,14 +122,6 @@ class Task(MDBoxLayout):
 
     def get_text(self):
         return self.task_input_field.text
-
-    def copy(self):
-        self_copy = Task(task_id=self.task_id, task_text=self.get_text(), belongs_to=self.belongs_to)
-        if self.is_done:
-            self_copy.mark_done()
-        if self.is_important:
-            self_copy.make_important()
-        return self_copy
 
 
 class SettingsScreen(MDScreen):
@@ -183,6 +184,7 @@ class MenuButton(OneLineIconListItem):
 
     def change_screen(self):
         manager: ScreenManager = get_screen_manager()
+        manager.current_screen.delete_all_tasks()
         manager.current = self.screen_name
 
 
@@ -261,6 +263,10 @@ class MainContainer(MDBoxLayout):
         if isinstance(self.screen_manager.current_screen, TasksScreen):
             for item in self.toolbar.children[0].ids.right_actions.children[1:]:
                 item.text_color = "#FFFFFF"
+            try:
+                self.screen_manager.current_screen.reload()
+            except AttributeError:
+                pass
         else:
             for item in self.toolbar.children[0].ids.right_actions.children[1:]:
                 item.text_color = "#646464"
@@ -322,21 +328,24 @@ class MainContainer(MDBoxLayout):
 class TodoApp(MDApp):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.tasks = TasksManager()
+        self.tasks_manager = tasks_manager.TasksManager()
         self.main_container = None
 
     def build(self):
         self.main_container = MainContainer()
         return self.main_container
 
-    def on_start(self):
-        self.main_container.load_tasks()
+    # def on_start(self):
+    #     self.main_container.load_tasks()
 
-    def on_stop(self):
-        self.main_container.save_tasks()
+    # def on_stop(self):
+    #     self.main_container.save_tasks()
 
     def get_main_container(self):
         return self.main_container
+
+    def get_tasks_manager(self):
+        return self.tasks_manager
 
 
 def main():
