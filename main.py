@@ -72,7 +72,7 @@ class TasksScreen(MDScreen):
         for i in self.get_tasks():
             self.delete_task(i)
 
-    def sort_tasks(self):
+    def sort_tasks_alphabet(self):
         # SORT ALFABET
         new_tasks_text = sorted([task.get_task_text() for task in self.get_tasks()])
         new_tasks = []
@@ -83,6 +83,18 @@ class TasksScreen(MDScreen):
 
         self.delete_all_tasks()
         self.import_tasks(new_tasks[::-1])
+
+    def sort_tasks_alphabet_reversed(self):
+        # SORT ALFABET
+        new_tasks_text = sorted([task.get_task_text() for task in self.get_tasks()])
+        new_tasks = []
+        for label in new_tasks_text:
+            for task in self.get_tasks():
+                if task.get_task_text() == label:
+                    new_tasks.append(task)
+
+        self.delete_all_tasks()
+        self.import_tasks(new_tasks)
 
 
 class Task(MDBoxLayout):
