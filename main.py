@@ -96,6 +96,29 @@ class TasksScreen(MDScreen):
         self.delete_all_tasks()
         self.import_tasks(new_tasks)
 
+    def sort_task_important_up(self):
+        tasks_important = []
+        tasks_NOT_important = []
+        for task in self.get_tasks():
+            if task.get_is_important():
+                tasks_important.append(task)
+            elif not task.get_is_important():
+                tasks_NOT_important.append(task)
+        new_task = tasks_important + tasks_NOT_important
+        self.delete_all_tasks()
+        self.import_tasks(new_task)
+
+    def sort_task_important_down(self):
+        tasks_important = []
+        tasks_NOT_important = []
+        for task in self.get_tasks():
+            if task.get_is_important():
+                tasks_important.append(task)
+            elif not task.get_is_important():
+                tasks_NOT_important.append(task)
+        new_task = tasks_NOT_important + tasks_important
+        self.delete_all_tasks()
+        self.import_tasks(new_task)
 
 class Task(MDBoxLayout):
     task_checkbox: MDCheckbox = ObjectProperty()
@@ -130,6 +153,9 @@ class Task(MDBoxLayout):
 
     def get_task_text(self):
         return self.task_input_field.text
+
+    def get_is_important(self):
+        return self.is_important
 
 
 class SettingsScreen(MDScreen):
