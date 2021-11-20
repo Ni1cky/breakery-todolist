@@ -188,12 +188,14 @@
 
 
 <TasksScreen>:
-    tasks: tasks
+    tasks_layout: tasks_layout
+    tasks_view: tasks_view
     RecycleView:
+        id: tasks_view
         size: self.size
         do_scroll_y: True
         RecycleGridLayout:
-            id: tasks
+            id: tasks_layout
             padding: 5, 5
             cols: 1
             spacing: 10

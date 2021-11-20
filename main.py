@@ -1,6 +1,8 @@
 import json
 import os
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.recyclegridlayout import RecycleGridLayout
+from kivy.uix.recycleview import RecycleView
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDIconButton
@@ -26,7 +28,8 @@ def get_tasks_manager():
 
 
 class TasksScreen(MDScreen):
-    tasks: GridLayout = ObjectProperty()
+    tasks_layout: RecycleGridLayout = ObjectProperty()
+    tasks_view: RecycleView = ObjectProperty()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -38,7 +41,8 @@ class TasksScreen(MDScreen):
     def add_new_task(self):
         tasks_man: tasks_manager.TasksManager = get_tasks_manager()
         tasks_man.create_new_task()
-        self.add_task(tasks_man.get_task(len(tasks_man.tasks) - 1))
+        print(self.tasks_layout.children)
+        # self.add_task(tasks_man.get_task(len(tasks_man.tasks) - 1))
 
     def add_task(self, task):
         self.tasks.add_widget(task)
@@ -53,10 +57,10 @@ class TasksScreen(MDScreen):
         return get_tasks_manager().get_tasks_for_screen(self.name)
 
     def import_tasks(self, tasks):
-        for task in tasks:
-            self.add_task(task)
+        self.tasks_view.data = tasks
 
     def search_task(self):
+        pass
         self.delete_all_tasks()
         search = self.get_tasktext_for_searching()
         if search:
@@ -67,10 +71,11 @@ class TasksScreen(MDScreen):
             self.reload()
 
     def delete_all_tasks(self):
-        self.tasks.clear_widgets()
+        self.tasks_view.data = []
 
     def sort_tasks(self):
         # SORT ALFABET
+        pass
         new_tasks_text = sorted([task.get_text() for task in self.get_tasks()])
         new_tasks = []
         for label in new_tasks_text:
@@ -95,7 +100,7 @@ class Task(MDBoxLayout):
     Класс задачи
     '''
 
-    def __init__(self, task_id=-1, task_text="", belongs_to=None, **kwargs):
+    def __init__(self, task_id=-1, task_text="", belongs_to=None, is_done=False, is_important=False, **kwargs):
         super().__init__(**kwargs)
 
         if belongs_to is None:
@@ -108,6 +113,10 @@ class Task(MDBoxLayout):
 
         self.is_done = False
         self.is_important = False
+        if is_done:
+            self.mark_done()
+        if is_important:
+            self.make_important()
 
     def update_parents(self, belongs_to):
         for parent in belongs_to:

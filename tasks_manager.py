@@ -1,5 +1,5 @@
 from kivy.uix.screenmanager import ScreenManager
-from main import Task, get_screen_manager
+from main import get_screen_manager
 
 
 class TasksManager:
@@ -18,6 +18,7 @@ class TasksManager:
         task["task_text"] = ""
         task["belongs_to"] = {"tasks", get_screen_manager().current}
         self.tasks.append(task)
+        self.reload_current_screen()
 
     def add_task_to_screen(self, task_id, screen_name):
         self.tasks[task_id]["belongs_to"].add(screen_name)
