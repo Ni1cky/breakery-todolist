@@ -183,7 +183,12 @@
             on_text: root.search_task()
     MDToolbar:
         size_hint_x: 0.25
-        right_action_items: [["magnify"], ["sort", root.sort_tasks], ["cog", root.open_settings]]
+        right_action_items: [["sort", root.open_sort_menu], ["cog", root.open_settings]]
+
+<RightContentCls>
+    IconLeftWidget:
+        icon: root.left_icon
+
 
 
 <TasksScreen>:

@@ -4,7 +4,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDIconButton
-from kivymd.uix.list import OneLineIconListItem
+from kivymd.uix.list import OneLineIconListItem, IRightBodyTouch, OneLineAvatarIconListItem
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.navigationdrawer import MDNavigationDrawer
 from kivymd.uix.screen import MDScreen
@@ -12,9 +12,8 @@ from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.textfield import MDTextField
 from constants import *
 from kivymd.app import MDApp
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.screenmanager import ScreenManager, NoTransition
-
 
 
 def get_screen_manager():
@@ -27,6 +26,11 @@ class TasksScreen(MDScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.all_tasks = []
+
+
+    def open_sort_menu(self):
+        # MDApp.get_running_app().get_main_container().toolbar
+        pass
 
     def delete_task(self, task, delete_from_presaved=False):
         self.tasks.remove_widget(task)
@@ -120,6 +124,7 @@ class TasksScreen(MDScreen):
         self.delete_all_tasks()
         self.import_tasks(new_task)
 
+
 class Task(MDBoxLayout):
     task_checkbox: MDCheckbox = ObjectProperty()
     task_input_field: MDTextField = ObjectProperty()
@@ -190,8 +195,46 @@ class SettingsScreen(MDScreen):
         pass
 
 
+class RightContentCls(OneLineAvatarIconListItem):
+    left_icon = StringProperty()
+    text = StringProperty()
+
+
 class ToolBar(MDBoxLayout):
     search_text_field: MDTextField = ObjectProperty()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        menu_items = [
+            {
+                "text": "Сортировка по алфавиту",
+                "left_icon": "sort-alphabetical-ascending",
+                "viewclass": "RightContentCls",
+                "on_release": self.do_sort_tasks_alphabet
+            },
+            {
+                "text": "Обратная сортировка по алфавиту",
+                "left_icon": "sort-alphabetical-descending",
+                "viewclass": "RightContentCls",
+                "on_release": self.sort_tasks_alphabet_reversed
+            },
+            {
+                "text": "Сортировка по важности",
+                "left_icon": "sort-alphabetical-descending",
+                "viewclass": "RightContentCls",
+                "on_release": self.sort_task_important_up
+            },
+            {
+                "text": "Обратная сортировка по важности",
+                "left_icon": "sort-alphabetical-descending",
+                "viewclass": "RightContentCls",
+                "on_release": self.sort_task_important_down
+            }
+        ]
+        self.menu = MDDropdownMenu(
+            items=menu_items,
+            width_mult=7,
+        )
 
     def open_menu(self):
         pass
@@ -199,8 +242,21 @@ class ToolBar(MDBoxLayout):
     def open_settings(self):
         pass
 
-    def sort_tasks(self):
-        pass
+    def open_sort_menu(self, instance):
+        self.menu.caller = instance
+        self.menu.open()
+
+    def sort_task_important_up(self):
+        get_screen_manager().current_screen.sort_task_important_up()
+
+    def do_sort_tasks_alphabet(self):
+        get_screen_manager().current_screen.sort_tasks_alphabet()
+
+    def sort_tasks_alphabet_reversed(self):
+        get_screen_manager().current_screen.sort_tasks_alphabet_reversed()
+
+    def sort_task_important_down(self):
+        get_screen_manager().current_screen.sort_task_important_down()
 
     def search_task(self):
         pass
