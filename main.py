@@ -95,12 +95,16 @@ class Task(MDBoxLayout):
     Класс задачи
     '''
 
-    def __init__(self, task_id=-1, task_text="", **kwargs):
+    def __init__(self, task_id=-1, task_text="", belongs_to=None, **kwargs):
         super().__init__(**kwargs)
+
+        if belongs_to is None:
+            belongs_to = {"tasks", }
+
         self.task_id = task_id
         self.task_input_field.text = task_text
 
-        self.belongs_to = {"tasks", }
+        self.belongs_to = belongs_to
 
         self.is_done = False
         self.is_important = False
