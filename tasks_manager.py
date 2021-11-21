@@ -7,7 +7,7 @@ class TasksManager:
         self.tasks = list()
 
     def add_new_task(self, task: Task):
-        task.task_id = len(self.tasks)
+        # task.task_id = len(self.tasks)
         self.tasks.append(task)
 
     def create_new_task(self):

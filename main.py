@@ -122,10 +122,6 @@ class Task(MDBoxLayout):
     def set_text(self, text):
         self.task_input_field.text = text
 
-    def change_text(self):
-        tasks_man = get_tasks_manager()
-        tasks_man.tasks[self.task_id].set_text(self.get_text())
-
 
 class SettingsScreen(MDScreen):
     def __init__(self, **kwargs):
@@ -186,8 +182,8 @@ class MenuButton(OneLineIconListItem):
             self.screen_name = screen_name
 
     def change_screen(self):
-        # manager: ScreenManager = get_screen_manager()
-        # manager.current_screen.delete_all_tasks()
+        if get_screen_manager().current == self.screen_name:
+            return
         get_current_screen().delete_all_tasks()
         get_screen_manager().current = self.screen_name
 
@@ -288,42 +284,50 @@ class MainContainer(MDBoxLayout):
         with open(self.SAVE_PATH, "r") as f:
             save = json.load(f)
 
+        tasks_man: tasks_manager.TasksManager = get_tasks_manager()
+
         save: dict = save[self.SAVE_NAME]
-
-        for scr in save.keys():
-
-            tasks: dict = save[scr]
-
-            for id, task in tasks.items():
-                new_task = Task(task_id=id, task_text=task["text"])
-                if task["is_done"]:
-                    new_task.mark_done()
-                if task["is_important"]:
-                    new_task.make_important()
-                cur_scr: TasksScreen = self.screen_manager.get_screen(scr)
-                cur_scr.add_task(new_task)
+        for task_id in save.keys():
+            task_params = save[task_id]
+            task = Task(task_id=int(task_id), task_text=task_params["text"])
+            if task_params["is_important"]:
+                task.make_important()
+            if task_params["is_done"]:
+                task.mark_done()
+            task.update_parents(task_params["belongs_to"])
+            tasks_man.add_new_task(task)
+        tasks_man.reload_current_screen()
 
     def save_tasks(self):
         if not os.path.exists(self.SAVE_FOLDER):
             os.mkdir(self.SAVE_FOLDER)
 
-        screens = self.screen_manager.screens
-
         data = {self.SAVE_NAME: {}}
         cur_save = data[self.SAVE_NAME]
-        for scr in screens:
-            if not isinstance(scr, TasksScreen):
-                continue
-            scr: TasksScreen
-            cur_scr = cur_save[scr.name] = {}
+        for task in get_tasks_manager().tasks:
+            cur_task = cur_save[task.task_id] = {}
+            cur_task["text"] = task.get_text()
+            cur_task["is_important"] = task.is_important
+            cur_task["is_done"] = task.is_done
+            cur_task["belongs_to"] = list(task.belongs_to)
 
-            for task in scr.get_tasks():
-                task: Task
-                cur_task = cur_scr[task.task_id] = {}
-                cur_task["text"] = task.get_text()
-                cur_task["is_done"] = task.is_done
-                cur_task["is_important"] = task.is_important
-
+        # screens = self.screen_manager.screens
+        #
+        # data = {self.SAVE_NAME: {}}
+        # cur_save = data[self.SAVE_NAME]
+        # for scr in screens:
+        #     if not isinstance(scr, TasksScreen):
+        #         continue
+        #     scr: TasksScreen
+        #     cur_scr = cur_save[scr.name] = {}
+        #
+        #     for task in scr.get_tasks():
+        #         task: Task
+        #         cur_task = cur_scr[task.task_id] = {}
+        #         cur_task["text"] = task.get_text()
+        #         cur_task["is_done"] = task.is_done
+        #         cur_task["is_important"] = task.is_important
+        #
         with open(self.SAVE_PATH, 'w') as f:
             json.dump(data, f)
 
@@ -341,11 +345,11 @@ class TodoApp(MDApp):
         self.main_container = MainContainer()
         return self.main_container
 
-    # def on_start(self):
-    #     self.main_container.load_tasks()
+    def on_start(self):
+        self.main_container.load_tasks()
 
-    # def on_stop(self):
-    #     self.main_container.save_tasks()
+    def on_stop(self):
+        self.main_container.save_tasks()
 
     def get_main_container(self):
         return self.main_container
