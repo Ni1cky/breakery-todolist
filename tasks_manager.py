@@ -11,13 +11,12 @@ class TasksManager:
     def create_new_task(self):
         task = Task()
         task.task_id = len(self.tasks)
-        task.update_parents([get_screen_manager().current, ])
         self.tasks.append(task)
-        self.reload_current_screen()
+        self.add_task_to_screen(-1, get_screen_manager().current)
 
     def add_task_to_screen(self, task_id, screen_name):
         self.tasks[task_id].belongs_to.add(screen_name)
-        self.reload_current_screen()
+        self.reload_all_screens()
 
     def delete_task(self, task_id):
         self.tasks.pop(task_id)
