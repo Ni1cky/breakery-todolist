@@ -16,16 +16,13 @@ from kivymd.app import MDApp
 from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.screenmanager import ScreenManager, NoTransition
 
-def get_screen_manager():
+
+def get_screen_manager() -> ScreenManager:
     return MDApp.get_running_app().get_main_container().get_screen_manager()
 
 
 def get_tasks_manager():
     return MDApp.get_running_app().get_tasks_manager()
-
-
-def get_current_screen():
-    return get_screen_manager().current_screen
 
 
 class TasksScreen(MDScreen):
@@ -35,7 +32,7 @@ class TasksScreen(MDScreen):
         return MDApp.get_running_app().get_main_container().toolbar.search_text_field.text
 
     def add_new_task(self):
-        tasks_man: tasks_manager.TasksManager = get_tasks_manager()
+        tasks_man = get_tasks_manager()
         tasks_man.create_new_task()
 
     def add_task(self, task):
@@ -113,6 +110,10 @@ class TasksScreen(MDScreen):
         new_task = tasks_NOT_important + tasks_important
         self.delete_all_tasks()
         self.import_tasks(new_task[::-1])
+
+
+def get_current_screen() -> TasksScreen:
+    return get_screen_manager().current_screen
 
 
 class Task(MDBoxLayout):
@@ -252,10 +253,12 @@ class MenuButton(OneLineIconListItem):
             self.screen_name = screen_name
 
     def change_screen(self):
-        if get_screen_manager().current == self.screen_name:
+        screen_manager = get_screen_manager()
+        if screen_manager.current == self.screen_name:
             return
-        get_current_screen().delete_all_tasks()
-        get_screen_manager().current = self.screen_name
+        screen_manager.current_screen.delete_all_tasks()
+        screen_manager.current = self.screen_name
+        get_tasks_manager().reload_current_screen()
 
 
 class LowerMenuLayout(MDBoxLayout):
@@ -283,7 +286,7 @@ class ScrollViewTasksList(ScrollView):
     def add_new_list(self):
         list_name = self.new_list_field.text
         screen_name = list_name
-        screen_manager: ScreenManager = get_screen_manager()
+        screen_manager = get_screen_manager()
         while screen_name in screen_manager.screen_names:
             if screen_name != "" and screen_name[-1].isdigit():
                 screen_name = screen_name[:-1] + str(int(screen_name[-1]) + 1)
@@ -307,7 +310,7 @@ class MainMenuLayout(MDNavigationDrawer):
 
 
 class MainContainer(MDBoxLayout):
-    screen_manager: ScreenManager = ObjectProperty()
+    screen_manager = ObjectProperty()
     main_menu: MainMenuLayout = ObjectProperty()
     toolbar: ToolBar = ObjectProperty()
 
@@ -328,9 +331,6 @@ class MainContainer(MDBoxLayout):
 
     def open_menu(self, instance=None):
         self.main_menu.nav_bar.set_state("open")
-
-    def open_settings(self, instance=None):
-        self.screen_manager.current = "settings_menu"
 
     # def open_screen_properly(self):
     #     if isinstance(self.screen_manager.current_screen, TasksScreen):
@@ -355,7 +355,7 @@ class MainContainer(MDBoxLayout):
         with open(self.SAVE_PATH, "r") as f:
             save = json.load(f)
 
-        tasks_man: tasks_manager.TasksManager = get_tasks_manager()
+        tasks_man = get_tasks_manager()
 
         save: dict = save[self.SAVE_NAME]
         for task_id in save.keys():
@@ -405,7 +405,7 @@ class TodoApp(MDApp):
     def on_stop(self):
         self.main_container.save_tasks()
 
-    def get_main_container(self):
+    def get_main_container(self) -> MainContainer:
         return self.main_container
 
     def get_tasks_manager(self):

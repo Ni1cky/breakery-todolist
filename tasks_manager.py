@@ -1,4 +1,3 @@
-from kivy.uix.screenmanager import ScreenManager
 from main import Task, get_screen_manager, get_current_screen
 
 
@@ -7,7 +6,6 @@ class TasksManager:
         self.tasks = list()
 
     def add_new_task(self, task: Task):
-        # task.task_id = len(self.tasks)
         self.tasks.append(task)
 
     def create_new_task(self):
@@ -35,7 +33,7 @@ class TasksManager:
         cur_screen.reload()
 
     def get_tasks_for_screen(self, screen_name=None):
-        screen_manager: ScreenManager = get_screen_manager()
+        screen_manager = get_screen_manager()
         screen_name = screen_name if screen_name else screen_manager.current
         tasks_to_load = [task for task in self.tasks if screen_name in task.belongs_to]
         return tasks_to_load
