@@ -59,14 +59,11 @@
             id: delete_btn
 
 <ScrollViewTasksList>:
-    size_hint: 2, None
-    MDStackLayout:
-        adaptive_height: True
-        MenuButton:
-            text: "list1"
-            icn: "home"
-            screen_name: "test"
-
+    ScrollView:
+        MDList:
+            MenuButton:
+                text: "list1"
+                icn: "home"
 
 
 <SettingsScreen>:
