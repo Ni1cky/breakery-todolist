@@ -55,12 +55,14 @@
             icon: 'delete'
             theme_text_color: 'Custom'
             text_color: 1, 1, 1, 1
-            on_press: root.delete_task()
+            on_press: root.delete()
             id: delete_btn
 
 <ScrollViewTasksList>:
+    screens_list: screens_list
     ScrollView:
         MDList:
+            id: screens_list
 
 
 <SettingsScreen>:
@@ -113,21 +115,21 @@
         text: "Мой день"
 
 <LowerMenuLayout>:
+    orientation: "vertical"
+    task_screens_scroll_view: task_screens_scroll_view
+    ScrollViewTasksList:
+        id: task_screens_scroll_view
+        new_list_field: new_list_field
 
     MDBoxLayout:
-        orientation: "vertical"
-        ScrollViewTasksList:
-            new_list_field: new_list_field
+        orientation: "horizontal"
 
-        MDBoxLayout:
-            orientation: "horizontal"
-
-            MDTextField:
-                id: new_list_field
-                hint_text: "Введите название списка"
-            MDIconButton:
-                on_press: root.children[0].children[1].add_new_list()
-                icon:"plus"
+        MDTextField:
+            id: new_list_field
+            hint_text: "Введите название списка"
+        MDIconButton:
+            on_press: task_screens_scroll_view.add_new_list()
+            icon:"plus"
 
 
 <MainMenuLayout>:
@@ -152,13 +154,15 @@
     ToolBar:
         id: toolbar
         size_hint_y: 64 / root.height
-        open_menu: root.open_menu
-        search_task: root.search_task
-        sort_tasks: root.sort_tasks
     MDNavigationLayout:
         ScreenManager:
-            on_current: root.open_screen_properly()
             id: screen_manager
+            TasksScreen:
+                name: "tasks"
+            TasksScreen:
+                name: "important"
+            TasksScreen:
+                name: "my_day"
         MainMenuLayout:
             id: main_menu
 
@@ -228,4 +232,4 @@
             theme_text_color: 'Custom'
             text_color: 1, 1, 1, 1
             user_font_size: "45sp"
-            on_press: root.add_task()
+            on_press: root.add_new_task()
