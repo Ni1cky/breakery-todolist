@@ -17,7 +17,6 @@ from kivy.uix.screenmanager import ScreenManager, NoTransition
 from kivymd.uix.stacklayout import MDStackLayout
 
 
-
 def get_screen_manager():
     return MDApp.get_running_app().get_main_container().get_screen_manager()
 
@@ -189,6 +188,7 @@ class LowerMenuLayout(MDBoxLayout):
     Нижняя часть меню
     '''
 
+
 class UpperMenuLayout(MDBoxLayout):
     '''
     Тут верхняя часть меню
@@ -208,17 +208,16 @@ class ScrollViewTasksList(ScrollView):
         screen_name = list_name
         screen_manager: ScreenManager = get_screen_manager()
         while screen_name in screen_manager.screen_names:
-            if(screen_name != "" and screen_name[-1].isdigit()):
+            if screen_name != "" and screen_name[-1].isdigit():
                 screen_name = screen_name[:-1] + str(int(screen_name[-1]) + 1)
             else:
-                screen_name+='1'
+                screen_name += '1'
         screen_manager.add_widget(TasksScreen(name=screen_name))
 
         newList = MenuButton(screen_name=screen_name)
         newList.text = list_name
         newList.icn = "home"
-        self.children[0].add_widget(newList)
-        print(screen_manager.screen_names)
+        self.children[0].children[0].add_widget(newList)
 
 
 class MainMenuLayout(MDNavigationDrawer):
@@ -330,8 +329,6 @@ class MainContainer(MDBoxLayout):
 
     def get_screen_manager(self):
         return self.screen_manager
-
-
 
 
 class TodoApp(MDApp):
