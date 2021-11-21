@@ -107,7 +107,14 @@ class Task(MDBoxLayout):
         screen_manager.current_screen.delete_task(self, delete_from_presaved=True)
 
     def make_important(self):
-        self.is_important = not self.is_important
+        if not self.is_important:
+            self.make_imp_btn.icon = 'cards-heart'
+            self.make_imp_btn.text_color = "#FF0000"
+            self.is_important = True
+        else:
+            self.make_imp_btn.icon = 'cards-heart-outline'
+            self.make_imp_btn.text_color = "#FFFFFF"
+            self.is_important = False
 
     def mark_done(self):
         self.is_done = not self.is_done
