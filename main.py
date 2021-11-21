@@ -337,7 +337,8 @@ class TodoApp(MDApp):
         return self.main_container
 
     def on_start(self):
-        self.main_container.load_tasks()
+        #self.main_container.load_tasks()
+        pass
 
     def on_stop(self):
         self.main_container.save_tasks()
