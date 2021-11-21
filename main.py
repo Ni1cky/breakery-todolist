@@ -46,12 +46,6 @@ class TasksScreen(MDScreen):
     def add_task(self, task):
         self.tasks.add_widget(task)
 
-    # def delete_task(self, task_id):
-    #     for task in self.tasks.children:
-    #         if task.task_id == task_id:
-    #             self.tasks.remove_widget(task)
-    #             return
-
     def get_tasks(self):
         return get_tasks_manager().get_tasks_for_screen(self.name)
 
@@ -192,9 +186,10 @@ class MenuButton(OneLineIconListItem):
             self.screen_name = screen_name
 
     def change_screen(self):
-        manager: ScreenManager = get_screen_manager()
-        manager.current_screen.delete_all_tasks()
-        manager.current = self.screen_name
+        # manager: ScreenManager = get_screen_manager()
+        # manager.current_screen.delete_all_tasks()
+        get_current_screen().delete_all_tasks()
+        get_screen_manager().current = self.screen_name
 
 
 class LowerMenuLayout(MDBoxLayout):
@@ -254,9 +249,10 @@ class MainContainer(MDBoxLayout):
         self.main_menu.nav_bar.set_state("open")
 
     def sort_tasks(self, instance=None):
-        if not isinstance(self.screen_manager.current_screen, TasksScreen):
+        cur_screen = get_current_screen()
+        if not isinstance(cur_screen, TasksScreen):
             return
-        cur_screen: TasksScreen = self.screen_manager.current_screen
+        cur_screen: TasksScreen
         cur_screen.sort_tasks()
 
     def search_task(self, instance=None):
