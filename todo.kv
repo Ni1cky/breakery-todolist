@@ -115,21 +115,21 @@
         text: "Мой день"
 
 <LowerMenuLayout>:
+    orientation: "vertical"
+    task_screens_scroll_view: task_screens_scroll_view
+    ScrollViewTasksList:
+        id: task_screens_scroll_view
+        new_list_field: new_list_field
 
     MDBoxLayout:
-        orientation: "vertical"
-        ScrollViewTasksList:
-            new_list_field: new_list_field
+        orientation: "horizontal"
 
-        MDBoxLayout:
-            orientation: "horizontal"
-
-            MDTextField:
-                id: new_list_field
-                hint_text: "Введите название списка"
-            MDIconButton:
-                on_press: root.children[0].children[1].add_new_list()
-                icon:"plus"
+        MDTextField:
+            id: new_list_field
+            hint_text: "Введите название списка"
+        MDIconButton:
+            on_press: task_screens_scroll_view.add_new_list()
+            icon:"plus"
 
 
 <MainMenuLayout>:
@@ -157,6 +157,12 @@
     MDNavigationLayout:
         ScreenManager:
             id: screen_manager
+            TasksScreen:
+                name: "tasks"
+            TasksScreen:
+                name: "important"
+            TasksScreen:
+                name: "my_day"
         MainMenuLayout:
             id: main_menu
 

@@ -261,26 +261,11 @@ class MenuButton(OneLineIconListItem):
         get_tasks_manager().reload_current_screen()
 
 
-class LowerMenuLayout(MDBoxLayout):
-    '''
-    Нижняя часть меню
-    '''
-    pass
-
-
-class UpperMenuLayout(MDBoxLayout):
-    '''
-    Тут верхняя часть меню
-    '''
-    pass
-
-
 class ScrollViewTasksList(ScrollView):
-    screens_list: MDList = ObjectProperty()
     '''
     Cписок задач
     '''
-
+    screens_list: MDList = ObjectProperty()
     new_list_field: MDTextField = ObjectProperty()
 
     def add_new_list(self):
@@ -294,10 +279,24 @@ class ScrollViewTasksList(ScrollView):
                 screen_name += '1'
         screen_manager.add_widget(TasksScreen(name=screen_name))
 
-        newList = MenuButton(screen_name=screen_name)
-        newList.text = list_name
-        newList.icn = "home"
-        self.screens_list.add_widget(newList)
+        new_list = MenuButton(screen_name=screen_name)
+        new_list.text = list_name
+        self.screens_list.add_widget(new_list)
+
+
+class LowerMenuLayout(MDBoxLayout):
+    task_screens_scroll_view: ScrollViewTasksList = ObjectProperty()
+    '''
+    Нижняя часть меню
+    '''
+    pass
+
+
+class UpperMenuLayout(MDBoxLayout):
+    '''
+    Тут верхняя часть меню
+    '''
+    pass
 
 
 class MainMenuLayout(MDNavigationDrawer):
@@ -310,54 +309,40 @@ class MainMenuLayout(MDNavigationDrawer):
 
 
 class MainContainer(MDBoxLayout):
-    screen_manager = ObjectProperty()
+    screen_manager: ScreenManager = ObjectProperty()
     main_menu: MainMenuLayout = ObjectProperty()
     toolbar: ToolBar = ObjectProperty()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.SAVE_NAME = SAVE_NAME
         self.SAVE_FOLDER = SAVE_FOLDER
-        self.SAVE_PATH = SAVE_PATH
+        self.TASKS_SAVE_NAME = TASKS_SAVE_NAME
+        self.TASKS_SAVE_PATH = TASKS_SAVE_PATH
+        self.SCREENS_SAVE_PATH = SCREENS_SAVE_PATH
+        self.SCREENS_SAVE_NAME = SCREENS_SAVE_NAME
 
         self.screen_manager.transition = NoTransition()
-        self.load_tasks_screens()
-
-    def load_tasks_screens(self):
-        self.screen_manager.add_widget(TasksScreen(name="important"))
-        self.screen_manager.add_widget(TasksScreen(name="tasks"))
-        self.screen_manager.add_widget(TasksScreen(name="my_day"))
-        self.screen_manager.current = "tasks"
 
     def open_menu(self, instance=None):
         self.main_menu.nav_bar.set_state("open")
 
-    # def open_screen_properly(self):
-    #     if isinstance(self.screen_manager.current_screen, TasksScreen):
-    #         for item in self.toolbar.children[0].ids.right_actions.children[1:]:
-    #             item.text_color = "#FFFFFF"
-    #         try:
-    #             self.screen_manager.current_screen.reload()
-    #         except AttributeError:
-    #             pass
-    #     else:
-    #         for item in self.toolbar.children[0].ids.right_actions.children[1:]:
-    #             item.text_color = "#646464"
+    def get_screen_manager(self):
+        return self.screen_manager
 
     def load_tasks(self):
         if (
                 not os.path.exists(self.SAVE_FOLDER) or
                 os.listdir(self.SAVE_FOLDER) == [".gitignore"] or
-                f"{self.SAVE_NAME}.json" not in os.listdir(self.SAVE_FOLDER)
+                f"{self.TASKS_SAVE_NAME}.json" not in os.listdir(self.SAVE_FOLDER)
         ):
             return
 
-        with open(self.SAVE_PATH, "r") as f:
+        with open(self.TASKS_SAVE_PATH, "r") as f:
             save = json.load(f)
 
         tasks_man = get_tasks_manager()
 
-        save: dict = save[self.SAVE_NAME]
+        save: dict = save[self.TASKS_SAVE_NAME]
         for task_id in save.keys():
             task_params = save[task_id]
             task = Task(task_id=int(task_id), task_text=task_params["text"])
@@ -372,9 +357,11 @@ class MainContainer(MDBoxLayout):
     def save_tasks(self):
         if not os.path.exists(self.SAVE_FOLDER):
             os.mkdir(self.SAVE_FOLDER)
+            with open(f"{self.SAVE_FOLDER}/.gitignore", "w") as gitignore:
+                gitignore.writelines(["*", "!.gitignore"])
 
-        data = {self.SAVE_NAME: {}}
-        cur_save = data[self.SAVE_NAME]
+        data = {self.TASKS_SAVE_NAME: {}}["screen_name"]
+        cur_save = data[self.TASKS_SAVE_NAME]
         for task in get_tasks_manager().tasks:
             cur_task = cur_save[task.task_id] = {}
             cur_task["text"] = task.get_text()
@@ -382,11 +369,45 @@ class MainContainer(MDBoxLayout):
             cur_task["is_done"] = task.is_done
             cur_task["belongs_to"] = list(task.belongs_to)
 
-        with open(self.SAVE_PATH, 'w') as f:
+        with open(self.TASKS_SAVE_PATH, 'w') as f:
             json.dump(data, f)
 
-    def get_screen_manager(self):
-        return self.screen_manager
+    def save_screens(self):
+        if not os.path.exists(self.SAVE_FOLDER):
+            os.mkdir(self.SAVE_FOLDER)
+            with open(f"{self.SAVE_FOLDER}/.gitignore", "w") as gitignore:
+                gitignore.writelines(["*", "!.gitignore"])
+
+        data = {self.SCREENS_SAVE_NAME: {}}
+        cur_save = data[self.SCREENS_SAVE_NAME]
+        for menu_button in self.main_menu.lower.task_screens_scroll_view.screens_list.children:
+            menu_button: MenuButton
+            cur_screen = cur_save[menu_button.text] = {}
+            cur_screen["screen_name"] = menu_button.screen_name
+
+        with open(self.SCREENS_SAVE_PATH, 'w') as f:
+            json.dump(data, f)
+
+    def load_screens(self):
+        if (
+                not os.path.exists(self.SAVE_FOLDER) or
+                os.listdir(self.SAVE_FOLDER) == [".gitignore"] or
+                f"{self.SCREENS_SAVE_NAME}.json" not in os.listdir(self.SAVE_FOLDER)
+        ):
+            return
+
+        with open(self.SCREENS_SAVE_PATH, "r") as f:
+            save = json.load(f)
+        save: dict = save[self.SCREENS_SAVE_NAME]
+
+        tasks_man = get_tasks_manager()
+
+        tasks_lists_list = self.main_menu.lower.task_screens_scroll_view.screens_list
+        for menu_button_text in save.keys():
+            tasks_lists_list.add_widget(MenuButton(text=menu_button_text, screen_name=save[menu_button_text]["screen_name"]))
+            self.screen_manager.add_widget(TasksScreen(name=save[menu_button_text]["screen_name"]))
+
+        tasks_man.reload_all_screens()
 
 
 class TodoApp(MDApp):
@@ -401,9 +422,11 @@ class TodoApp(MDApp):
 
     def on_start(self):
         self.main_container.load_tasks()
+        self.main_container.load_screens()
 
     def on_stop(self):
         self.main_container.save_tasks()
+        self.main_container.save_screens()
 
     def get_main_container(self) -> MainContainer:
         return self.main_container
