@@ -360,7 +360,7 @@ class MainContainer(MDBoxLayout):
             with open(f"{self.SAVE_FOLDER}/.gitignore", "w") as gitignore:
                 gitignore.writelines(["*", "!.gitignore"])
 
-        data = {self.TASKS_SAVE_NAME: {}}["screen_name"]
+        data = {self.TASKS_SAVE_NAME: {}}
         cur_save = data[self.TASKS_SAVE_NAME]
         for task in get_tasks_manager().tasks:
             cur_task = cur_save[task.task_id] = {}
