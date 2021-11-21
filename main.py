@@ -1,10 +1,11 @@
 import json
 import os
+
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDIconButton
-from kivymd.uix.list import OneLineIconListItem, OneLineAvatarIconListItem, MDList
+from kivymd.uix.list import MDList, OneLineAvatarIconListItem, OneLineIconListItem
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.navigationdrawer import MDNavigationDrawer
 from kivymd.uix.screen import MDScreen
@@ -14,7 +15,7 @@ import tasks_manager
 from constants import *
 from kivymd.app import MDApp
 from kivy.properties import ObjectProperty, StringProperty
-from kivy.uix.screenmanager import ScreenManager, NoTransition
+from kivy.uix.screenmanager import NoTransition, ScreenManager
 
 
 def get_screen_manager() -> ScreenManager:
@@ -27,6 +28,11 @@ def get_tasks_manager():
 
 class TasksScreen(MDScreen):
     tasks: GridLayout = ObjectProperty()
+    calling_button: OneLineIconListItem = ObjectProperty()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
 
     def get_tasktext_for_searching(self):
         return MDApp.get_running_app().get_main_container().toolbar.search_text_field.text
@@ -246,19 +252,36 @@ class MenuButton(OneLineIconListItem):
     '''
     Класс кнопки, меняющей экран
     '''
-
     def __init__(self, screen_name=None, **kwargs):
         super().__init__(**kwargs)
         if screen_name:
             self.screen_name = screen_name
 
+    def mark_active(self, prev):
+        self.bg_color = list(map(lambda x: x-0.3, TASK_BUTTON_DEFAULT_COLOR))
+        if prev:
+            prev.bg_color = TASK_BUTTON_DEFAULT_COLOR
+    def f(self):
+        print(1)
+
     def change_screen(self):
         screen_manager = get_screen_manager()
+
         if screen_manager.current == self.screen_name:
+            screen_manager.current_screen.calling_button = self
             return
+
+
+        self.mark_active(screen_manager.current_screen.calling_button)
+
         screen_manager.current_screen.delete_all_tasks()
+
+
         screen_manager.current = self.screen_name
+        screen_manager.current_screen.calling_button = self
+
         get_tasks_manager().reload_current_screen()
+
 
 
 class ScrollViewTasksList(ScrollView):
@@ -404,7 +427,8 @@ class MainContainer(MDBoxLayout):
 
         tasks_lists_list = self.main_menu.lower.task_screens_scroll_view.screens_list
         for menu_button_text in save.keys():
-            tasks_lists_list.add_widget(MenuButton(text=menu_button_text, screen_name=save[menu_button_text]["screen_name"]))
+            tasks_lists_list.add_widget(
+                MenuButton(text=menu_button_text, screen_name=save[menu_button_text]["screen_name"]))
             self.screen_manager.add_widget(TasksScreen(name=save[menu_button_text]["screen_name"]))
 
         tasks_man.reload_all_screens()
