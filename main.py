@@ -4,7 +4,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDIconButton
-from kivymd.uix.list import OneLineIconListItem
+from kivymd.uix.list import OneLineIconListItem, IRightBodyTouch, OneLineAvatarIconListItem
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.navigationdrawer import MDNavigationDrawer
 from kivymd.uix.screen import MDScreen
@@ -13,9 +13,9 @@ from kivymd.uix.textfield import MDTextField
 import tasks_manager
 from constants import *
 from kivymd.app import MDApp
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.screenmanager import ScreenManager, NoTransition
-
+from kivymd.uix.stacklayout import MDStackLayout
 
 def get_screen_manager():
     return MDApp.get_running_app().get_main_container().get_screen_manager()
@@ -35,6 +35,17 @@ class TasksScreen(MDScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.all_tasks = []
+
+
+    def open_sort_menu(self):
+        # MDApp.get_running_app().get_main_container().toolbar
+        pass
+
+    def delete_task(self, task, delete_from_presaved=False):
+        self.tasks.remove_widget(task)
+        if delete_from_presaved:
+            if task in self.all_tasks:
+                self.all_tasks.remove(task)
 
     def get_tasktext_for_searching(self):
         return MDApp.get_running_app().get_main_container().toolbar.search_text_field.text
@@ -66,7 +77,7 @@ class TasksScreen(MDScreen):
     def delete_all_tasks(self):
         self.tasks.clear_widgets()
 
-    def sort_tasks(self):
+    def sort_tasks_alphabet(self):
         # SORT ALFABET
         new_tasks_text = sorted([task.get_text() for task in self.get_tasks()])
         new_tasks = []
@@ -82,6 +93,42 @@ class TasksScreen(MDScreen):
         if get_screen_manager().current == self.name:
             self.delete_all_tasks()
             self.import_tasks(self.get_tasks())
+
+    def sort_tasks_alphabet_reversed(self):
+        # SORT ALFABET
+        new_tasks_text = sorted([task.get_task_text() for task in self.get_tasks()])
+        new_tasks = []
+        for label in new_tasks_text:
+            for task in self.get_tasks():
+                if task.get_task_text() == label:
+                    new_tasks.append(task)
+
+        self.delete_all_tasks()
+        self.import_tasks(new_tasks)
+
+    def sort_task_important_up(self):
+        tasks_important = []
+        tasks_NOT_important = []
+        for task in self.get_tasks():
+            if task.get_is_important():
+                tasks_important.append(task)
+            elif not task.get_is_important():
+                tasks_NOT_important.append(task)
+        new_task = tasks_important + tasks_NOT_important
+        self.delete_all_tasks()
+        self.import_tasks(new_task[::-1])
+
+    def sort_task_important_down(self):
+        tasks_important = []
+        tasks_NOT_important = []
+        for task in self.get_tasks():
+            if task.get_is_important():
+                tasks_important.append(task)
+            elif not task.get_is_important():
+                tasks_NOT_important.append(task)
+        new_task = tasks_NOT_important + tasks_important
+        self.delete_all_tasks()
+        self.import_tasks(new_task[::-1])
 
 
 class Task(MDBoxLayout):
@@ -122,50 +169,95 @@ class Task(MDBoxLayout):
     def set_text(self, text):
         self.task_input_field.text = text
 
+    def get_is_important(self):
+        return self.is_important
 
-class SettingsScreen(MDScreen):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        menu_items = [
-            {
-                "text": "темная",
-                "viewclass": "OneLineListItem",
-                "on_release": lambda x="темная": self.menu_callback(x)
-            },
-            {
-                "text": "светлая",
-                "viewclass": "OneLineListItem",
-                "on_release": lambda x="светлая": self.menu_callback(x)
-            },
-            {
-                "text": "бурая",
-                "viewclass": "OneLineListItem",
-                "on_release": lambda x="бурая": self.menu_callback(x)
-            }
-        ]
-        TodoApp.menu = MDDropdownMenu(
-            caller=self.ids.button,
-            items=menu_items,
-            width_mult=3,
-        )
 
-    def menu_callback(self, text_item):
-        # функция, которая вызывается при наатии
-        # print(text_item)
-        pass
+class RightContentCls(OneLineAvatarIconListItem):
+    left_icon = StringProperty()
+    text = StringProperty()
 
 
 class ToolBar(MDBoxLayout):
     search_text_field: MDTextField = ObjectProperty()
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        theme_items = [
+            {
+                "text": "светлая",
+                "viewclass": "OneLineListItem",
+                # "on_release": self.do_sort_tasks_alphabet
+            },
+            {
+                "text": "темная",
+                "viewclass": "OneLineListItem",
+                # "on_release": self.sort_tasks_alphabet_reversed
+            },
+            {
+                "text": "бурая",
+                "viewclass": "OneLineListItem",
+                # "on_release": self.sort_task_important_up
+            }
+        ]
+
+        menu_items = [
+            {
+                "text": "Сортировка по алфавиту",
+                "left_icon": "sort-alphabetical-ascending",
+                "viewclass": "RightContentCls",
+                "on_release": self.do_sort_tasks_alphabet
+            },
+            {
+                "text": "Обратная сортировка по алфавиту",
+                "left_icon": "sort-alphabetical-descending",
+                "viewclass": "RightContentCls",
+                "on_release": self.sort_tasks_alphabet_reversed
+            },
+            {
+                "text": "Сортировка по важности",
+                "left_icon": "sort-alphabetical-descending",
+                "viewclass": "RightContentCls",
+                "on_release": self.sort_task_important_up
+            },
+            {
+                "text": "Обратная сортировка по важности",
+                "left_icon": "sort-alphabetical-descending",
+                "viewclass": "RightContentCls",
+                # "on_release": pass
+            }
+        ]
+        self.menu = MDDropdownMenu(
+            items=menu_items,
+            width_mult=7,
+        )
+        self.themes = MDDropdownMenu(
+            items=theme_items,
+            width_mult=3,
+        )
+
+    def open_theme_menu(self, instance):
+        self.themes.caller = instance
+        self.themes.open()
+
     def open_menu(self):
         pass
 
-    def open_settings(self):
-        pass
+    def open_sort_menu(self, instance):
+        self.menu.caller = instance
+        self.menu.open()
 
-    def sort_tasks(self):
-        pass
+    def sort_task_important_up(self):
+        get_screen_manager().current_screen.sort_task_important_up()
+
+    def do_sort_tasks_alphabet(self):
+        get_screen_manager().current_screen.sort_tasks_alphabet()
+
+    def sort_tasks_alphabet_reversed(self):
+        get_screen_manager().current_screen.sort_tasks_alphabet_reversed()
+
+    def sort_task_important_down(self):
+        get_screen_manager().current_screen.sort_task_important_down()
 
     def search_task(self):
         pass
@@ -207,8 +299,23 @@ class ScrollViewTasksList(ScrollView):
     Cписок задач
     '''
 
+    new_list_field: MDTextField = ObjectProperty()
+
     def add_new_list(self):
-        pass
+        list_name = self.new_list_field.text
+        screen_name = list_name
+        screen_manager: ScreenManager = get_screen_manager()
+        while screen_name in screen_manager.screen_names:
+            if screen_name != "" and screen_name[-1].isdigit():
+                screen_name = screen_name[:-1] + str(int(screen_name[-1]) + 1)
+            else:
+                screen_name += '1'
+        screen_manager.add_widget(TasksScreen(name=screen_name))
+
+        newList = MenuButton(screen_name=screen_name)
+        newList.text = list_name
+        newList.icn = "home"
+        self.children[0].children[0].add_widget(newList)
 
 
 class MainMenuLayout(MDNavigationDrawer):
@@ -238,7 +345,7 @@ class MainContainer(MDBoxLayout):
         self.screen_manager.add_widget(TasksScreen(name="important"))
         self.screen_manager.add_widget(TasksScreen(name="tasks"))
         self.screen_manager.add_widget(TasksScreen(name="my_day"))
-        self.screen_manager.add_widget(SettingsScreen(name="settings_menu"))
+        self.screen_manager.add_widget(TasksScreen(name="test"))
         self.screen_manager.current = "tasks"
 
     def open_menu(self, instance=None):
@@ -346,7 +453,8 @@ class TodoApp(MDApp):
         return self.main_container
 
     def on_start(self):
-        self.main_container.load_tasks()
+        #self.main_container.load_tasks()
+        pass
 
     def on_stop(self):
         self.main_container.save_tasks()

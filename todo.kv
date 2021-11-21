@@ -61,6 +61,8 @@
 
 <ScrollViewTasksList>:
     ScrollView:
+        MDList:
+
 
 <SettingsScreen>:
     MDRaisedButton:
@@ -78,13 +80,6 @@
         icon: root.icn
         theme_text_color: "Custom"
         text_color: 0, 0, 0, 1
-
-
-<LowerMenuLayout>:
-    ScrollViewTasksList:
-    MDIconButton:
-	    on_press: root.children[0].add_new_list()
-        icon:"plus"
 
 <UpperMenuLayout>:
     orientation: "vertical"
@@ -118,6 +113,24 @@
         icn: "calendar"
         text: "Мой день"
 
+<LowerMenuLayout>:
+
+    MDBoxLayout:
+        orientation: "vertical"
+        ScrollViewTasksList:
+            new_list_field: new_list_field
+
+        MDBoxLayout:
+            orientation: "horizontal"
+
+            MDTextField:
+                id: new_list_field
+                hint_text: "Введите название списка"
+            MDIconButton:
+                on_press: root.children[0].children[1].add_new_list()
+                icon:"plus"
+
+
 <MainMenuLayout>:
     upper: upper
     lower: lower
@@ -143,7 +156,6 @@
         open_menu: root.open_menu
         search_task: root.search_task
         sort_tasks: root.sort_tasks
-        open_settings: root.open_settings
     MDNavigationLayout:
         ScreenManager:
             on_current: root.open_screen_properly()
@@ -184,7 +196,12 @@
             on_text: root.search_task()
     MDToolbar:
         size_hint_x: 0.25
-        right_action_items: [["magnify"], ["sort", root.sort_tasks], ["cog", root.open_settings]]
+        right_action_items: [["sort", root.open_sort_menu], ["brush", root.open_theme_menu]]
+
+<RightContentCls>
+    IconLeftWidget:
+        icon: root.left_icon
+
 
 
 <TasksScreen>:
