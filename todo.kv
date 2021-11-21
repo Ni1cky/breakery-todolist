@@ -60,8 +60,10 @@
             id: delete_btn
 
 <ScrollViewTasksList>:
+    screens_list: screens_list
     ScrollView:
         MDList:
+            id: screens_list
 
 
 <SettingsScreen>:
@@ -153,12 +155,9 @@
     ToolBar:
         id: toolbar
         size_hint_y: 64 / root.height
-        open_menu: root.open_menu
-        search_task: root.search_task
-        sort_tasks: root.sort_tasks
     MDNavigationLayout:
         ScreenManager:
-            on_current: root.open_screen_properly()
+#            on_current: root.open_screen_properly()
             id: screen_manager
         MainMenuLayout:
             id: main_menu

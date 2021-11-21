@@ -4,7 +4,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDIconButton
-from kivymd.uix.list import OneLineIconListItem, IRightBodyTouch, OneLineAvatarIconListItem
+from kivymd.uix.list import OneLineIconListItem, OneLineAvatarIconListItem, MDList
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.navigationdrawer import MDNavigationDrawer
 from kivymd.uix.screen import MDScreen
@@ -15,7 +15,6 @@ from constants import *
 from kivymd.app import MDApp
 from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.screenmanager import ScreenManager, NoTransition
-from kivymd.uix.stacklayout import MDStackLayout
 
 def get_screen_manager():
     return MDApp.get_running_app().get_main_container().get_screen_manager()
@@ -31,21 +30,6 @@ def get_current_screen():
 
 class TasksScreen(MDScreen):
     tasks: GridLayout = ObjectProperty()
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.all_tasks = []
-
-
-    def open_sort_menu(self):
-        # MDApp.get_running_app().get_main_container().toolbar
-        pass
-
-    def delete_task(self, task, delete_from_presaved=False):
-        self.tasks.remove_widget(task)
-        if delete_from_presaved:
-            if task in self.all_tasks:
-                self.all_tasks.remove(task)
 
     def get_tasktext_for_searching(self):
         return MDApp.get_running_app().get_main_container().toolbar.search_text_field.text
@@ -96,11 +80,11 @@ class TasksScreen(MDScreen):
 
     def sort_tasks_alphabet_reversed(self):
         # SORT ALFABET
-        new_tasks_text = sorted([task.get_task_text() for task in self.get_tasks()])
+        new_tasks_text = sorted([task.get_text() for task in self.get_tasks()])
         new_tasks = []
         for label in new_tasks_text:
             for task in self.get_tasks():
-                if task.get_task_text() == label:
+                if task.get_text() == label:
                     new_tasks.append(task)
 
         self.delete_all_tasks()
@@ -110,9 +94,9 @@ class TasksScreen(MDScreen):
         tasks_important = []
         tasks_NOT_important = []
         for task in self.get_tasks():
-            if task.get_is_important():
+            if task.is_important:
                 tasks_important.append(task)
-            elif not task.get_is_important():
+            elif not task.is_important:
                 tasks_NOT_important.append(task)
         new_task = tasks_important + tasks_NOT_important
         self.delete_all_tasks()
@@ -122,9 +106,9 @@ class TasksScreen(MDScreen):
         tasks_important = []
         tasks_NOT_important = []
         for task in self.get_tasks():
-            if task.get_is_important():
+            if task.is_important:
                 tasks_important.append(task)
-            elif not task.get_is_important():
+            elif not task.is_important:
                 tasks_NOT_important.append(task)
         new_task = tasks_NOT_important + tasks_important
         self.delete_all_tasks()
@@ -165,12 +149,6 @@ class Task(MDBoxLayout):
 
     def get_text(self):
         return self.task_input_field.text
-
-    def set_text(self, text):
-        self.task_input_field.text = text
-
-    def get_is_important(self):
-        return self.is_important
 
 
 class RightContentCls(OneLineAvatarIconListItem):
@@ -224,7 +202,7 @@ class ToolBar(MDBoxLayout):
                 "text": "Обратная сортировка по важности",
                 "left_icon": "sort-alphabetical-descending",
                 "viewclass": "RightContentCls",
-                # "on_release": pass
+                "on_release": self.sort_task_important_down
             }
         ]
         self.menu = MDDropdownMenu(
@@ -240,8 +218,8 @@ class ToolBar(MDBoxLayout):
         self.themes.caller = instance
         self.themes.open()
 
-    def open_menu(self):
-        pass
+    def open_menu(self, instance):
+        MDApp.get_running_app().get_main_container().open_menu()
 
     def open_sort_menu(self, instance):
         self.menu.caller = instance
@@ -260,7 +238,7 @@ class ToolBar(MDBoxLayout):
         get_screen_manager().current_screen.sort_task_important_down()
 
     def search_task(self):
-        pass
+        get_screen_manager().current_screen.search_task()
 
 
 class MenuButton(OneLineIconListItem):
@@ -295,6 +273,7 @@ class UpperMenuLayout(MDBoxLayout):
 
 
 class ScrollViewTasksList(ScrollView):
+    screens_list: MDList = ObjectProperty()
     '''
     Cписок задач
     '''
@@ -315,7 +294,7 @@ class ScrollViewTasksList(ScrollView):
         newList = MenuButton(screen_name=screen_name)
         newList.text = list_name
         newList.icn = "home"
-        self.children[0].children[0].add_widget(newList)
+        self.screens_list.add_widget(newList)
 
 
 class MainMenuLayout(MDNavigationDrawer):
@@ -345,40 +324,25 @@ class MainContainer(MDBoxLayout):
         self.screen_manager.add_widget(TasksScreen(name="important"))
         self.screen_manager.add_widget(TasksScreen(name="tasks"))
         self.screen_manager.add_widget(TasksScreen(name="my_day"))
-        self.screen_manager.add_widget(TasksScreen(name="test"))
         self.screen_manager.current = "tasks"
 
     def open_menu(self, instance=None):
         self.main_menu.nav_bar.set_state("open")
 
-    def sort_tasks(self, instance=None):
-        cur_screen = get_current_screen()
-        if not isinstance(cur_screen, TasksScreen):
-            return
-        cur_screen: TasksScreen
-        cur_screen.sort_tasks()
-
-    def search_task(self, instance=None):
-        cur_screen = get_current_screen()
-        if not isinstance(cur_screen, TasksScreen):
-            return
-        cur_screen: TasksScreen
-        cur_screen.search_task()
-
     def open_settings(self, instance=None):
         self.screen_manager.current = "settings_menu"
 
-    def open_screen_properly(self):
-        if isinstance(self.screen_manager.current_screen, TasksScreen):
-            for item in self.toolbar.children[0].ids.right_actions.children[1:]:
-                item.text_color = "#FFFFFF"
-            try:
-                self.screen_manager.current_screen.reload()
-            except AttributeError:
-                pass
-        else:
-            for item in self.toolbar.children[0].ids.right_actions.children[1:]:
-                item.text_color = "#646464"
+    # def open_screen_properly(self):
+    #     if isinstance(self.screen_manager.current_screen, TasksScreen):
+    #         for item in self.toolbar.children[0].ids.right_actions.children[1:]:
+    #             item.text_color = "#FFFFFF"
+    #         try:
+    #             self.screen_manager.current_screen.reload()
+    #         except AttributeError:
+    #             pass
+    #     else:
+    #         for item in self.toolbar.children[0].ids.right_actions.children[1:]:
+    #             item.text_color = "#646464"
 
     def load_tasks(self):
         if (
@@ -418,23 +382,6 @@ class MainContainer(MDBoxLayout):
             cur_task["is_done"] = task.is_done
             cur_task["belongs_to"] = list(task.belongs_to)
 
-        # screens = self.screen_manager.screens
-        #
-        # data = {self.SAVE_NAME: {}}
-        # cur_save = data[self.SAVE_NAME]
-        # for scr in screens:
-        #     if not isinstance(scr, TasksScreen):
-        #         continue
-        #     scr: TasksScreen
-        #     cur_scr = cur_save[scr.name] = {}
-        #
-        #     for task in scr.get_tasks():
-        #         task: Task
-        #         cur_task = cur_scr[task.task_id] = {}
-        #         cur_task["text"] = task.get_text()
-        #         cur_task["is_done"] = task.is_done
-        #         cur_task["is_important"] = task.is_important
-        #
         with open(self.SAVE_PATH, 'w') as f:
             json.dump(data, f)
 
@@ -453,8 +400,7 @@ class TodoApp(MDApp):
         return self.main_container
 
     def on_start(self):
-        #self.main_container.load_tasks()
-        pass
+        self.main_container.load_tasks()
 
     def on_stop(self):
         self.main_container.save_tasks()
