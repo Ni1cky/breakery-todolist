@@ -256,9 +256,10 @@ class MainContainer(MDBoxLayout):
         cur_screen.sort_tasks()
 
     def search_task(self, instance=None):
-        if not isinstance(self.screen_manager.current_screen, TasksScreen):
+        cur_screen = get_current_screen()
+        if not isinstance(cur_screen, TasksScreen):
             return
-        cur_screen: TasksScreen = self.screen_manager.current_screen
+        cur_screen: TasksScreen
         cur_screen.search_task()
 
     def open_settings(self, instance=None):
