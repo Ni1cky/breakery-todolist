@@ -3,6 +3,7 @@ import os
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.recyclegridlayout import RecycleGridLayout
 from kivy.uix.recycleview import RecycleView
+from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDIconButton
@@ -31,33 +32,30 @@ class TasksScreen(MDScreen):
     tasks_layout: RecycleGridLayout = ObjectProperty()
     tasks_view: RecycleView = ObjectProperty()
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.all_tasks = []
-
     def get_tasktext_for_searching(self):
         return MDApp.get_running_app().get_main_container().toolbar.search_text_field.text
 
     def add_new_task(self):
         tasks_man: tasks_manager.TasksManager = get_tasks_manager()
         tasks_man.create_new_task()
-        print(self.tasks_layout.children)
         # self.add_task(tasks_man.get_task(len(tasks_man.tasks) - 1))
 
     def add_task(self, task):
-        self.tasks.add_widget(task)
+        self.tasks_layout.add_widget(task)
 
     def delete_task(self, task_id):
-        for task in self.tasks.children:
+        for task in self.tasks_layout.children:
             if task.task_id == task_id:
-                self.tasks.remove_widget(task)
+                self.tasks_layout.remove_widget(task)
                 return
 
     def get_tasks(self):
-        return get_tasks_manager().get_tasks_for_screen(self.name)
+        return [task for task in get_tasks_manager().get_tasks_for_screen(self.name)]
 
     def import_tasks(self, tasks):
         self.tasks_view.data = tasks
+        # for task in [Task(**task_params) for task_params in tasks]:
+        #     self.add_task(task)
 
     def search_task(self):
         pass
@@ -72,6 +70,7 @@ class TasksScreen(MDScreen):
 
     def delete_all_tasks(self):
         self.tasks_view.data = []
+        self.tasks_layout.clear_widgets()
 
     def sort_tasks(self):
         # SORT ALFABET
@@ -90,9 +89,12 @@ class TasksScreen(MDScreen):
         if get_screen_manager().current == self.name:
             self.delete_all_tasks()
             self.import_tasks(self.get_tasks())
+            print(self.tasks_view.data)
+            # self.tasks_view.refresh_from_data()
+            print(self.tasks_layout.children)
 
 
-class Task(MDBoxLayout):
+class Task(MDBoxLayout, RecycleDataViewBehavior):
     task_checkbox: MDCheckbox = ObjectProperty()
     task_input_field: MDTextField = ObjectProperty()
     make_imp_btn: MDIconButton = ObjectProperty()
@@ -117,6 +119,9 @@ class Task(MDBoxLayout):
             self.mark_done()
         if is_important:
             self.make_important()
+
+    def get_params(self):
+        return {"is_done": self.is_done, "is_important": self.is_important, "belongs_to": self.belongs_to, "task_text":self.task_input_field.text, "task_id": self.task_id}
 
     def update_parents(self, belongs_to):
         for parent in belongs_to:
