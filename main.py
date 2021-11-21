@@ -110,7 +110,7 @@ class TasksScreen(MDScreen):
                 tasks_NOT_important.append(task)
         new_task = tasks_important + tasks_NOT_important
         self.delete_all_tasks()
-        self.import_tasks(new_task)
+        self.import_tasks(new_task[::-1])
 
     def sort_task_important_down(self):
         tasks_important = []
@@ -122,7 +122,7 @@ class TasksScreen(MDScreen):
                 tasks_NOT_important.append(task)
         new_task = tasks_NOT_important + tasks_important
         self.delete_all_tasks()
-        self.import_tasks(new_task)
+        self.import_tasks(new_task[::-1])
 
 
 class Task(MDBoxLayout):
