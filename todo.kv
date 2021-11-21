@@ -142,7 +142,6 @@
         open_menu: root.open_menu
         search_task: root.search_task
         sort_tasks: root.sort_tasks
-        open_settings: root.open_settings
     MDNavigationLayout:
         ScreenManager:
             on_current: root.open_screen_properly()
@@ -183,7 +182,7 @@
             on_text: root.search_task()
     MDToolbar:
         size_hint_x: 0.25
-        right_action_items: [["sort", root.open_sort_menu], ["cog", root.open_settings]]
+        right_action_items: [["sort", root.open_sort_menu], ["brush", root.open_theme_menu]]
 
 <RightContentCls>
     IconLeftWidget:
