@@ -25,6 +25,10 @@ def get_tasks_manager():
     return MDApp.get_running_app().get_tasks_manager()
 
 
+def get_current_screen():
+    return get_screen_manager().current_screen
+
+
 class TasksScreen(MDScreen):
     tasks: GridLayout = ObjectProperty()
 
@@ -38,16 +42,15 @@ class TasksScreen(MDScreen):
     def add_new_task(self):
         tasks_man: tasks_manager.TasksManager = get_tasks_manager()
         tasks_man.create_new_task()
-        self.add_task(tasks_man.get_task(len(tasks_man.tasks) - 1))
 
     def add_task(self, task):
         self.tasks.add_widget(task)
 
-    def delete_task(self, task_id):
-        for task in self.tasks.children:
-            if task.task_id == task_id:
-                self.tasks.remove_widget(task)
-                return
+    # def delete_task(self, task_id):
+    #     for task in self.tasks.children:
+    #         if task.task_id == task_id:
+    #             self.tasks.remove_widget(task)
+    #             return
 
     def get_tasks(self):
         return get_tasks_manager().get_tasks_for_screen(self.name)
