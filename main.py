@@ -1,5 +1,7 @@
 import json
 import os
+import time
+
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.boxlayout import MDBoxLayout
@@ -38,9 +40,6 @@ class TasksScreen(MDScreen):
     def add_task(self, task):
         self.tasks.add_widget(task)
 
-    def remove_task(self, task):
-        self.remove_widget(task)
-        print('remove task work')
     def get_tasks(self):
         return get_tasks_manager().get_tasks_for_screen(self.name)
 
@@ -143,8 +142,6 @@ class Task(MDBoxLayout):
         else:
             for parent in belongs_to:
                 self.belongs_to.add(parent)
-        #for parent in belongs_to:
-         #   self.belongs_to.add(parent)
 
     def delete(self):
         get_tasks_manager().delete_task(self.task_id)
@@ -154,15 +151,12 @@ class Task(MDBoxLayout):
 
     def mark_done(self):
         self.is_done = not self.is_done
-
-        #get_screen_manager().current_screen.tasks.remove_widget(self)
-        #get_screen_manager().current_screen.remove_task(self)
-        get_tasks_manager().reload_all_screens()
-        self.delete()
         if self.is_done:
             self.update_parents('done_tasks')
+            self.belongs_to.remove('tasks')
         else:
             self.update_parents('tasks')
+            self.belongs_to.remove('done_tasks')
         get_screen_manager().current_screen.reload()
         self.task_checkbox.active = self.is_done
 
