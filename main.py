@@ -38,6 +38,9 @@ class TasksScreen(MDScreen):
     def add_task(self, task):
         self.tasks.add_widget(task)
 
+    def remove_task(self, task):
+        self.remove_widget(task)
+        print('remove task work')
     def get_tasks(self):
         return get_tasks_manager().get_tasks_for_screen(self.name)
 
@@ -135,8 +138,13 @@ class Task(MDBoxLayout):
         self.is_important = False
 
     def update_parents(self, belongs_to):
-        for parent in belongs_to:
-            self.belongs_to.add(parent)
+        if isinstance(belongs_to, str):
+            self.belongs_to.add(belongs_to)
+        else:
+            for parent in belongs_to:
+                self.belongs_to.add(parent)
+        #for parent in belongs_to:
+         #   self.belongs_to.add(parent)
 
     def delete(self):
         get_tasks_manager().delete_task(self.task_id)
@@ -146,11 +154,15 @@ class Task(MDBoxLayout):
 
     def mark_done(self):
         self.is_done = not self.is_done
+
+        #get_screen_manager().current_screen.tasks.remove_widget(self)
+        #get_screen_manager().current_screen.remove_task(self)
+        get_tasks_manager().reload_all_screens()
+        self.delete()
         if self.is_done:
-            self.update_parents('tasks_done')
+            self.update_parents('done_tasks')
         else:
             self.update_parents('tasks')
-        #get_tasks_manager().reload()
         get_screen_manager().current_screen.reload()
         self.task_checkbox.active = self.is_done
 
