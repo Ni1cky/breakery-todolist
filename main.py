@@ -146,6 +146,12 @@ class Task(MDBoxLayout):
 
     def mark_done(self):
         self.is_done = not self.is_done
+        if self.is_done:
+            self.update_parents('tasks_done')
+        else:
+            self.update_parents('tasks')
+        #get_tasks_manager().reload()
+        get_screen_manager().current_screen.reload()
         self.task_checkbox.active = self.is_done
 
     def get_text(self):
