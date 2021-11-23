@@ -2,6 +2,7 @@ import json
 import os
 import time
 
+from kivy.graphics import Color, RoundedRectangle
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.boxlayout import MDBoxLayout
@@ -152,9 +153,10 @@ class Task(MDBoxLayout):
     def mark_done(self):
         self.is_done = not self.is_done
         if self.is_done:
+            #Закрась меня!!!
             self.update_parents('done_tasks')
-            self.belongs_to.remove('tasks')
         else:
+            #Закрась меня ОБРАТНО!!!
             self.update_parents('tasks')
             self.belongs_to.remove('done_tasks')
         get_screen_manager().current_screen.reload()
