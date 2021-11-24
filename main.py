@@ -308,6 +308,10 @@ class MainMenuLayout(MDNavigationDrawer):
     nav_bar: MDNavigationDrawer = ObjectProperty()
 
 
+class TasksMenuDrawer(MDNavigationDrawer):
+    pass
+
+
 class MainContainer(MDBoxLayout):
     screen_manager: ScreenManager = ObjectProperty()
     main_menu: MainMenuLayout = ObjectProperty()

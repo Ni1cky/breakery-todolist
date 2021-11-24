@@ -2,6 +2,7 @@
     task_checkbox: task_checkbox
     task_input_field: task_input_field
     make_imp_btn: make_imp_btn
+    menu_btn: menu_btn
     canvas:
         Color:
             rgba: 0, 0.31, 0.88, 0.7
@@ -57,6 +58,25 @@
             text_color: 1, 1, 1, 1
             on_press: root.delete()
             id: delete_btn
+    AnchorLayout:
+        anchor_x: "center"
+        anchor_y: "center"
+        size_hint: 0.1, 1
+        MDIconButton:
+            icon: 'dots-vertical'
+            theme_text_color: 'Custom'
+            text_color: 1, 1, 1, 1
+            on_press: root.set_state("open")
+            id: menu_btn
+
+<TasksMenuDrawer>:
+    orientation: "vertical"
+    halign: "top"
+    md_bg_color: 1, 1, 1, 1
+    anchor: "right"
+    MDTextField:
+        hint_text"Переименовать"
+        font_size: 20
 
 <ScrollViewTasksList>:
     screens_list: screens_list
@@ -150,6 +170,7 @@
     screen_manager: screen_manager
     main_menu: main_menu
     toolbar: toolbar
+    tasks_bar:tasks_bar
     orientation: "vertical"
     ToolBar:
         id: toolbar
@@ -165,6 +186,8 @@
                 name: "my_day"
         MainMenuLayout:
             id: main_menu
+        TasksMenuDrawer:
+            id:tasks_bar
 
 <ToolBar>:
     search_text_field: search_text_field
