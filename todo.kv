@@ -84,6 +84,7 @@
         text_color: 0, 0, 0, 1
 
 <UpperMenuLayout>:
+    start_button: tasks_button
     orientation: "vertical"
     padding: "8dp"
     spacing: "8dp"
@@ -159,6 +160,7 @@
         ScreenManager:
             id: screen_manager
             TasksScreen:
+                calling_button: main_menu.upper.start_button
                 name: "tasks"
             TasksScreen:
                 name: "important"
@@ -169,8 +171,11 @@
 
 <ToolBar>:
     search_text_field: search_text_field
+    left_toolbar: ltbr
     MDToolbar:
+        id: ltbr
         size_hint_x: 0.45
+        title: "asdasdasdasdasda"
         left_action_items: [["menu", root.open_menu]]
         theme_text_color: "Custom"
         icon_left_color: 1, 0, 0, 1
