@@ -67,7 +67,7 @@ class TasksScreen(MDScreen):
         new_tasks = []
         for label in new_tasks_text:
             for task in self.get_tasks():
-                if task.get_text() == label:
+                if task.get_text() == label and task not in new_tasks:
                     new_tasks.append(task)
 
         self.delete_all_tasks()
@@ -84,7 +84,7 @@ class TasksScreen(MDScreen):
         new_tasks = []
         for label in new_tasks_text:
             for task in self.get_tasks():
-                if task.get_text() == label:
+                if task.get_text() == label and task not in new_tasks:
                     new_tasks.append(task)
 
         self.delete_all_tasks()
