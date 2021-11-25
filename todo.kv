@@ -58,19 +58,13 @@
             on_press: root.delete()
             id: delete_btn
 
+
 <ScrollViewTasksList>:
     screens_list: screens_list
     ScrollView:
         MDList:
             id: screens_list
 
-
-<SettingsScreen>:
-    MDRaisedButton:
-        id: button
-        text: "Выбор цветовой темы"
-        pos_hint: {"center_x": .5, "center_y": .5}
-        on_release: app.menu.open()
 
 <MenuButton>:
     theme_text_color: "Custom"
@@ -83,6 +77,7 @@
         theme_text_color: "Custom"
         text_color: 0, 0, 0, 1
 
+
 <UpperMenuLayout>:
     start_button: tasks_button
     orientation: "vertical"
@@ -94,6 +89,7 @@
         font_size: 20
         size_hint_y: None
         height: self.texture_size[1]
+
 
     MDLabel:
         text: "Авторы: Nicky, !!!, GOGX31, VadLord, RegreTTO, dion, Хитрый Страус"
@@ -116,13 +112,13 @@
         icn: "calendar"
         text: "Мой день"
 
+
 <LowerMenuLayout>:
     orientation: "vertical"
     task_screens_scroll_view: task_screens_scroll_view
     ScrollViewTasksList:
         id: task_screens_scroll_view
         new_list_field: new_list_field
-
     MDBoxLayout:
         orientation: "horizontal"
 
@@ -148,6 +144,7 @@
     LowerMenuLayout:
         id: lower
 
+
 <MainContainer>:
     screen_manager: screen_manager
     main_menu: main_menu
@@ -168,6 +165,7 @@
                 name: "my_day"
         MainMenuLayout:
             id: main_menu
+
 
 <ToolBar>:
     search_text_field: search_text_field
@@ -207,10 +205,12 @@
         size_hint_x: 0.25
         right_action_items: [["sort", root.open_sort_menu], ["brush", root.open_theme_menu]]
 
-<RightContentCls>
+
+<RightContentCls@OneLineAvatarIconListItem>
+    left_icon: ""
+    text: ""
     IconLeftWidget:
         icon: root.left_icon
-
 
 
 <TasksScreen>:
