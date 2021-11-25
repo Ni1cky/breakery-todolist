@@ -152,11 +152,6 @@ class Task(MDBoxLayout):
         return self.task_input_field.text
 
 
-class RightContentCls(OneLineAvatarIconListItem):
-    left_icon = StringProperty()
-    text = StringProperty()
-
-
 class ToolBar(MDBoxLayout):
     search_text_field: MDTextField = ObjectProperty()
 
