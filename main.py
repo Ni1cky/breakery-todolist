@@ -25,8 +25,13 @@ def get_tasks_manager():
     return MDApp.get_running_app().get_tasks_manager()
 
 
+class TasksMenuDrawer(MDNavigationDrawer):
+    pass
+
+
 class TasksScreen(MDScreen):
     tasks: GridLayout = ObjectProperty()
+    info_drawer: TasksMenuDrawer = ObjectProperty()
 
     def get_tasktext_for_searching(self):
         return MDApp.get_running_app().get_main_container().toolbar.search_text_field.text
@@ -111,6 +116,9 @@ class TasksScreen(MDScreen):
         self.delete_all_tasks()
         self.import_tasks(new_task[::-1])
 
+    def open_info_drawer(self):
+        self.info_drawer.set_state("open")
+
 
 def get_current_screen() -> TasksScreen:
     return get_screen_manager().current_screen
@@ -150,6 +158,9 @@ class Task(MDBoxLayout):
 
     def get_text(self):
         return self.task_input_field.text
+
+    def open_additional_info(self):
+        get_current_screen().open_info_drawer()
 
 
 class RightContentCls(OneLineAvatarIconListItem):
@@ -306,10 +317,6 @@ class MainMenuLayout(MDNavigationDrawer):
     upper: UpperMenuLayout = ObjectProperty()
     lower: LowerMenuLayout = ObjectProperty()
     nav_bar: MDNavigationDrawer = ObjectProperty()
-
-
-class TasksMenuDrawer(MDNavigationDrawer):
-    pass
 
 
 class MainContainer(MDBoxLayout):

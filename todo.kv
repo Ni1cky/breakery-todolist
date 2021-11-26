@@ -66,16 +66,17 @@
             icon: 'dots-vertical'
             theme_text_color: 'Custom'
             text_color: 1, 1, 1, 1
-            on_press: root.set_state("open")
+            on_press: root.open_additional_info()
             id: menu_btn
 
 <TasksMenuDrawer>:
     orientation: "vertical"
     halign: "top"
+    state: "close"
     md_bg_color: 1, 1, 1, 1
     anchor: "right"
     MDTextField:
-        hint_text"Переименовать"
+        hint_text: "Переименовать"
         font_size: 20
 
 <ScrollViewTasksList>:
@@ -170,7 +171,7 @@
     screen_manager: screen_manager
     main_menu: main_menu
     toolbar: toolbar
-    tasks_bar:tasks_bar
+#    tasks_bar: tasks_bar
     orientation: "vertical"
     ToolBar:
         id: toolbar
@@ -186,8 +187,8 @@
                 name: "my_day"
         MainMenuLayout:
             id: main_menu
-        TasksMenuDrawer:
-            id:tasks_bar
+#        TasksMenuDrawer:
+#            id:tasks_bar
 
 <ToolBar>:
     search_text_field: search_text_field
@@ -229,9 +230,9 @@
         icon: root.left_icon
 
 
-
 <TasksScreen>:
     tasks: tasks
+    info_drawer: info_drawer
     ScrollView:
         size: self.size
         do_scroll_y: True
@@ -256,3 +257,6 @@
             text_color: 1, 1, 1, 1
             user_font_size: "45sp"
             on_press: root.add_new_task()
+    MDNavigationLayout:
+        TasksMenuDrawer:
+            id: info_drawer
