@@ -78,6 +78,41 @@
     MDTextField:
         hint_text: "Переименовать"
         font_size: 20
+    MDBoxLayout:
+        size_hint_y: 0.3
+        orientation:"horizontal"
+        MDBoxLayout:
+            size_hint_x: 0.5
+            orientation: "vertical"
+            MDLabel:
+                valign: "center"
+                text: "выполненно"
+                theme_text_color: "Custom"
+                halign: "center"
+                text_color: 0, 0, 0, 0.4
+            MDCheckbox:
+                valign: "center"
+                halign: "center"
+                selected_color: "#00BFFF"
+                unselected_color: 0, 0, 0, 1
+        MDBoxLayout:
+            size_hint_x: 0.5
+            orientation: "vertical"
+            MDLabel:
+                halign: "center"
+                valign: "center"
+                text: "важно"
+                theme_text_color: "Custom"
+                text_color: 0, 0, 0, 0.4
+            MDIconButton:
+                pos_hint: {"center_x": .5, "center_y": .5}
+                icon: 'cards-heart-outline'
+                theme_text_color: 'Custom'
+                text_color: "#000000"
+    MDBoxLayout:
+        orientation:"horizontal"
+        # заглушка
+
 
 <ScrollViewTasksList>:
     screens_list: screens_list
