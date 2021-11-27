@@ -80,37 +80,71 @@
         font_size: 20
     MDBoxLayout:
         size_hint_y: 0.3
-        orientation:"horizontal"
+        orientation:"vertical"
         MDBoxLayout:
-            size_hint_x: 0.5
-            orientation: "vertical"
-            MDLabel:
-                valign: "center"
-                text: "выполненно"
-                theme_text_color: "Custom"
-                halign: "center"
-                text_color: 0, 0, 0, 0.4
-            MDCheckbox:
-                valign: "center"
-                halign: "center"
-                selected_color: "#00BFFF"
-                unselected_color: 0, 0, 0, 1
+            orientation: "horizontal"
+            AnchorLayout:
+                size_hint_x: 0.8
+                MDLabel:
+                    valign: "center"
+                    halign: "left"
+                    text: "выполненно"
+                    theme_text_color: "Custom"
+                    text_color: 0, 0, 0, 0.7
+            AnchorLayout:
+                size_hint_x: 0.2
+                MDCheckbox:
+                    valign: "center"
+                    halign: "center"
+                    selected_color: "#00BFFF"
+                    unselected_color: 0, 0, 0, 1
         MDBoxLayout:
-            size_hint_x: 0.5
-            orientation: "vertical"
-            MDLabel:
-                halign: "center"
-                valign: "center"
-                text: "важно"
-                theme_text_color: "Custom"
-                text_color: 0, 0, 0, 0.4
-            MDIconButton:
-                pos_hint: {"center_x": .5, "center_y": .5}
-                icon: 'cards-heart-outline'
-                theme_text_color: 'Custom'
-                text_color: "#000000"
+            orientation: "horizontal"
+            AnchorLayout:
+                size_hint_x: 0.8
+                MDLabel:
+                    halign: "left"
+                    valign: "center"
+                    text: "добавить в важные"
+                    theme_text_color: "Custom"
+                    text_color: 0, 0, 0, 0.7
+            AnchorLayout:
+                size_hint_x: 0.2
+                MDIconButton:
+                    pos_hint: {"center_x": .5, "center_y": .5}
+                    icon: 'cards-heart-outline'
+                    theme_text_color: 'Custom'
+                    text_color: "#000000"
     MDBoxLayout:
+        size_hint_y: 0.15
         orientation:"horizontal"
+        AnchorLayout:
+            size_hint_x: 0.8
+            MDLabel:
+                halign: "left"
+                text:"11.11.1111"
+                theme_text_color: 'Custom'
+                text_color: 0, 0, 0, 0.7
+        AnchorLayout:
+            size_hint_x: 0.2
+            MDIconButton:
+                icon: "calendar"
+    MDBoxLayout:
+        size_hint_y: 0.15
+        AnchorLayout:
+            size_hint_x: 0.8
+            MDLabel:
+                halign: "left"
+                text: "выберите уровень приоритетности"
+                theme_text_color: 'Custom'
+                text_color: 0, 0, 0, 0.7
+        AnchorLayout:
+            size_hint_x: 0.2
+            MDLabel:
+                halign: "center"
+                text: "0"
+    MDBoxLayout:
+        size_hint_y: 0.3
         # заглушка
 
 
