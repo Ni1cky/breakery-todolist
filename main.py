@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 from kivy.uix.gridlayout import GridLayout
@@ -8,6 +9,7 @@ from kivymd.uix.label import MDLabel
 from kivymd.uix.list import OneLineIconListItem, OneLineAvatarIconListItem, MDList
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.navigationdrawer import MDNavigationDrawer
+from kivymd.uix.picker import MDDatePicker
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.textfield import MDTextField
@@ -34,19 +36,24 @@ class Task(MDBoxLayout):
     Класс задачи
     '''
 
-    def __init__(self, task_id=-1, task_text="", **kwargs):
+    def __init__(self, task_id=-1, task_text="", deadline=datetime.date.today().strftime("%d-%m-%y"), **kwargs):
         super().__init__(**kwargs)
         self.task_id = task_id
         self.task_input_field.text = task_text
-
+        self.deadline = deadline
         self.belongs_to = {"tasks", }
-
         self.is_done = False
         self.is_important = False
 
     def update_parents(self, belongs_to):
         for parent in belongs_to:
             self.belongs_to.add(parent)
+
+    def set_deadline(self, new_deadline):
+        self.deadline = new_deadline
+
+    def get_deadline(self):
+        return self.deadline
 
     def delete(self):
         get_tasks_manager().delete_task(self.task_id)
@@ -57,6 +64,9 @@ class Task(MDBoxLayout):
     def mark_done(self):
         self.is_done = not self.is_done
         self.task_checkbox.active = self.is_done
+
+    def set_text(self, text):
+        self.task_input_field.text = text
 
     def get_text(self):
         return self.task_input_field.text
@@ -72,19 +82,39 @@ class Task(MDBoxLayout):
 class TasksMenuDrawer(MDNavigationDrawer):
     task_text_field: MDTextField = ObjectProperty()
     completed: MDCheckbox = ObjectProperty()
+    make_important: MDIconButton = ObjectProperty()
     deadline_text: MDLabel = ObjectProperty()
 
     def __init__(self, task_id: int = -1, **kwargs):
         super().__init__(**kwargs)
         self.task_id = task_id
         if self.task_id != -1:
+            self.task: Task = get_tasks_manager().get_task(self.task_id)
             self.init_drawer()
 
     def init_drawer(self):
-        self.completed.active = get_tasks_manager().get_task(self.task_id).is_completed()
+        self.completed.active = self.task.is_completed()
+        self.task_text_field.text = self.task.get_text()
+        self.deadline_text.text = self.task.get_deadline()
+
+    def make_important(self):
+        self.task.is_important = not self.task.is_important
 
     def open(self):
         self.set_state("open")
+
+    def apply_changes(self):
+        self.task.set_text(self.task_text_field.text)
+        self.task.is_done = self.completed.state
+
+    def on_save(self, instance, value, date_range):
+        self.task.set_deadline(value)
+
+    def open_calendar(self):
+        picker = MDDatePicker(min_date=datetime.date.today(),
+                              max_date=datetime.date(datetime.date.today().year + 4, 1, 1))
+        picker.bind(on_save=self.on_save)
+        picker.open()
 
 
 class TasksScreen(MDScreen):

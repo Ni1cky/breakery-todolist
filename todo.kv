@@ -73,6 +73,7 @@
     task_text_field: task_text_field
     completed: completed
     deadline_text: deadline_text
+    make_important: make_important
     orientation: "vertical"
     halign: "top"
     state: "close"
@@ -92,7 +93,7 @@
                 MDLabel:
                     valign: "center"
                     halign: "left"
-                    text: "выполнено"
+                    text: "Выполнено"
                     theme_text_color: "Custom"
                     text_color: 0, 0, 0, 0.7
             AnchorLayout:
@@ -110,7 +111,7 @@
                 MDLabel:
                     halign: "left"
                     valign: "center"
-                    text: "добавить в важные"
+                    text: "Добавить в важные"
                     theme_text_color: "Custom"
                     text_color: 0, 0, 0, 0.7
             AnchorLayout:
@@ -118,6 +119,8 @@
                 MDIconButton:
                     pos_hint: {"center_x": .5, "center_y": .5}
                     icon: 'cards-heart-outline'
+                    id: make_important
+                    on_press: root.make_important()
                     theme_text_color: 'Custom'
                     text_color: "#000000"
     MDBoxLayout:
