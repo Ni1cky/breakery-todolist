@@ -1,6 +1,6 @@
 import json
 import os
-from kivy.graphics import Color, Line
+from kivy.graphics import Color
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.boxlayout import MDBoxLayout
