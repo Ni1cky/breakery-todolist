@@ -102,6 +102,11 @@
         icn: "home"
         text: "Задачи"
     MenuButton:
+        id: done_tasks_button
+        screen_name: "done_tasks"
+        icn: "home"
+        text: "Сделано"
+    MenuButton:
         id: important_button
         screen_name: "important"
         icn: "cards-heart"
@@ -142,8 +147,10 @@
     id: nav_bar
     UpperMenuLayout:
         id: upper
+        size_hint_y: 0.65
     LowerMenuLayout:
         id: lower
+        size_hint_y: 0.35
 
 
 <MainContainer>:
@@ -160,6 +167,8 @@
             TasksScreen:
                 calling_button: main_menu.upper.start_button
                 name: "tasks"
+            TasksScreen:
+                name: "done_tasks"
             TasksScreen:
                 name: "important"
             TasksScreen:

@@ -1,5 +1,6 @@
 import json
 import os
+from kivy.graphics import Color
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.boxlayout import MDBoxLayout
@@ -70,7 +71,7 @@ class TasksScreen(MDScreen):
         new_tasks = []
         for label in new_tasks_text:
             for task in self.get_tasks():
-                if task.get_text() == label:
+                if task.get_text() == label and task not in new_tasks:
                     new_tasks.append(task)
 
         self.delete_all_tasks()
@@ -87,7 +88,7 @@ class TasksScreen(MDScreen):
         new_tasks = []
         for label in new_tasks_text:
             for task in self.get_tasks():
-                if task.get_text() == label:
+                if task.get_text() == label and task not in new_tasks:
                     new_tasks.append(task)
 
         self.delete_all_tasks()
@@ -141,8 +142,11 @@ class Task(MDBoxLayout):
         self.is_important = False
 
     def update_parents(self, belongs_to):
-        for parent in belongs_to:
-            self.belongs_to.add(parent)
+        if isinstance(belongs_to, str):
+            self.belongs_to.add(belongs_to)
+        else:
+            for parent in belongs_to:
+                self.belongs_to.add(parent)
 
     def delete(self):
         get_tasks_manager().delete_task(self.task_id)
@@ -152,7 +156,23 @@ class Task(MDBoxLayout):
 
     def mark_done(self):
         self.is_done = not self.is_done
+        self.repaint()
+        if self.is_done:
+            get_tasks_manager().add_task_to_screen(self.task_id, "done_tasks")
+        else:
+            self.belongs_to.remove('done_tasks')
+        get_screen_manager().current_screen.reload()
         self.task_checkbox.active = self.is_done
+
+    def repaint(self):
+        for child in self.canvas.children:
+            if isinstance(child, Color):
+                if child.rgba == [0.0, 0.31, 0.88, 0.7]:
+                    child.rgba = [0.39, 0.39, 0.39, 1]
+                    return
+                if child.rgba == [0.39, 0.39, 0.39, 1]:
+                    child.rgba = [0.0, 0.31, 0.88, 0.7]
+                    return
 
     def get_text(self):
         return self.task_input_field.text
@@ -364,12 +384,12 @@ class MainContainer(MDBoxLayout):
         for task_id in save.keys():
             task_params = save[task_id]
             task = Task(task_id=int(task_id), task_text=task_params["text"])
+            tasks_man.add_new_task(task)
             if task_params["is_important"]:
                 task.make_important()
             if task_params["is_done"]:
                 task.mark_done()
             task.update_parents(task_params["belongs_to"])
-            tasks_man.add_new_task(task)
         tasks_man.reload_current_screen()
 
     def save_tasks(self):
