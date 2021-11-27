@@ -70,12 +70,16 @@
             id: menu_btn
 
 <TasksMenuDrawer>:
+    task_text_field: task_text_field
+    completed: completed
+    deadline_text: deadline_text
     orientation: "vertical"
     halign: "top"
     state: "close"
     md_bg_color: 1, 1, 1, 1
     anchor: "right"
     MDTextField:
+        id: task_text_field
         hint_text: "Переименовать"
         font_size: 20
     MDBoxLayout:
@@ -88,12 +92,13 @@
                 MDLabel:
                     valign: "center"
                     halign: "left"
-                    text: "выполненно"
+                    text: "выполнено"
                     theme_text_color: "Custom"
                     text_color: 0, 0, 0, 0.7
             AnchorLayout:
                 size_hint_x: 0.2
                 MDCheckbox:
+                    id: completed
                     valign: "center"
                     halign: "center"
                     selected_color: "#00BFFF"
@@ -121,6 +126,7 @@
         AnchorLayout:
             size_hint_x: 0.8
             MDLabel:
+                id: deadline_text
                 halign: "left"
                 text:"11.11.1111"
                 theme_text_color: 'Custom'
@@ -167,10 +173,10 @@
     text_color: 0, 0, 0, 1
     icn: ""
     on_press: self.change_screen()
-    IconLeftWidgetWithoutTouch:
-        icon: root.icn
-        theme_text_color: "Custom"
-        text_color: 0, 0, 0, 1
+#    IconLeftWidgetWithoutTouch:
+#        icon: root.icn
+#        theme_text_color: "Custom"
+#        text_color: 0, 0, 0, 1
 
 <UpperMenuLayout>:
     orientation: "vertical"
