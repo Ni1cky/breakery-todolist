@@ -4,6 +4,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDIconButton
+from kivymd.uix.label import MDLabel
 from kivymd.uix.list import OneLineIconListItem, OneLineAvatarIconListItem, MDList
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.navigationdrawer import MDNavigationDrawer
@@ -25,8 +26,65 @@ def get_tasks_manager():
     return MDApp.get_running_app().get_tasks_manager()
 
 
+class Task(MDBoxLayout):
+    task_checkbox: MDCheckbox = ObjectProperty()
+    task_input_field: MDTextField = ObjectProperty()
+    make_imp_btn: MDIconButton = ObjectProperty()
+    '''
+    Класс задачи
+    '''
+
+    def __init__(self, task_id=-1, task_text="", **kwargs):
+        super().__init__(**kwargs)
+        self.task_id = task_id
+        self.task_input_field.text = task_text
+
+        self.belongs_to = {"tasks", }
+
+        self.is_done = False
+        self.is_important = False
+
+    def update_parents(self, belongs_to):
+        for parent in belongs_to:
+            self.belongs_to.add(parent)
+
+    def delete(self):
+        get_tasks_manager().delete_task(self.task_id)
+
+    def make_important(self):
+        self.is_important = not self.is_important
+
+    def mark_done(self):
+        self.is_done = not self.is_done
+        self.task_checkbox.active = self.is_done
+
+    def get_text(self):
+        return self.task_input_field.text
+
+    def is_completed(self):
+        return self.is_done
+
+    def open_additional_info(self):
+        info = TasksMenuDrawer(self.task_id)
+        info.open()
+
+
 class TasksMenuDrawer(MDNavigationDrawer):
-    pass
+    task_text_field: MDTextField = ObjectProperty()
+    completed: MDCheckbox = ObjectProperty()
+    deadline_text: MDLabel = ObjectProperty()
+
+    def __init__(self, task_id: int = -1, **kwargs):
+        super().__init__(**kwargs)
+        self.task_id = task_id
+        if self.task_id != -1:
+            self.init_drawer()
+
+    def init_drawer(self):
+        self.completed.active = get_tasks_manager().get_task(self.task_id).is_completed()
+
+    def open(self):
+        self.set_state("open")
 
 
 class TasksScreen(MDScreen):
@@ -116,51 +174,9 @@ class TasksScreen(MDScreen):
         self.delete_all_tasks()
         self.import_tasks(new_task[::-1])
 
-    def open_info_drawer(self):
-        self.info_drawer.set_state("open")
-
 
 def get_current_screen() -> TasksScreen:
     return get_screen_manager().current_screen
-
-
-class Task(MDBoxLayout):
-    task_checkbox: MDCheckbox = ObjectProperty()
-    task_input_field: MDTextField = ObjectProperty()
-    make_imp_btn: MDIconButton = ObjectProperty()
-    '''
-    Класс задачи
-    '''
-
-    def __init__(self, task_id=-1, task_text="", **kwargs):
-        super().__init__(**kwargs)
-        self.task_id = task_id
-        self.task_input_field.text = task_text
-
-        self.belongs_to = {"tasks", }
-
-        self.is_done = False
-        self.is_important = False
-
-    def update_parents(self, belongs_to):
-        for parent in belongs_to:
-            self.belongs_to.add(parent)
-
-    def delete(self):
-        get_tasks_manager().delete_task(self.task_id)
-
-    def make_important(self):
-        self.is_important = not self.is_important
-
-    def mark_done(self):
-        self.is_done = not self.is_done
-        self.task_checkbox.active = self.is_done
-
-    def get_text(self):
-        return self.task_input_field.text
-
-    def open_additional_info(self):
-        get_current_screen().open_info_drawer()
 
 
 class RightContentCls(OneLineAvatarIconListItem):
@@ -415,7 +431,8 @@ class MainContainer(MDBoxLayout):
 
         tasks_lists_list = self.main_menu.lower.task_screens_scroll_view.screens_list
         for menu_button_text in save.keys():
-            tasks_lists_list.add_widget(MenuButton(text=menu_button_text, screen_name=save[menu_button_text]["screen_name"]))
+            tasks_lists_list.add_widget(
+                MenuButton(text=menu_button_text, screen_name=save[menu_button_text]["screen_name"]))
             self.screen_manager.add_widget(TasksScreen(name=save[menu_button_text]["screen_name"]))
 
         tasks_man.reload_all_screens()
