@@ -71,6 +71,7 @@
     text_color: 0, 0, 0, 1
     icn: ""
     on_press: self.change_screen()
+
     IconLeftWidgetWithoutTouch:
         icon: root.icn
         theme_text_color: "Custom"
@@ -78,6 +79,7 @@
 
 
 <UpperMenuLayout>:
+    start_button: tasks_button
     orientation: "vertical"
     padding: "8dp"
     spacing: "8dp"
@@ -112,17 +114,18 @@
 
 
 <LowerMenuLayout>:
-    orientation: "vertical"
     task_screens_scroll_view: task_screens_scroll_view
+
+    orientation: "vertical"
     ScrollViewTasksList:
         id: task_screens_scroll_view
         new_list_field: new_list_field
     MDBoxLayout:
         orientation: "horizontal"
-
         MDTextField:
             id: new_list_field
             hint_text: "Введите название списка"
+            on_text_validate: task_screens_scroll_view.add_new_list()
         MDIconButton:
             on_press: task_screens_scroll_view.add_new_list()
             icon:"plus"
@@ -155,6 +158,7 @@
         ScreenManager:
             id: screen_manager
             TasksScreen:
+                calling_button: main_menu.upper.start_button
                 name: "tasks"
             TasksScreen:
                 name: "important"
@@ -166,8 +170,11 @@
 
 <ToolBar>:
     search_text_field: search_text_field
+    left_toolbar: ltbr
     MDToolbar:
+        id: ltbr
         size_hint_x: 0.45
+        title: "asdasdasdasdasda"
         left_action_items: [["menu", root.open_menu]]
         theme_text_color: "Custom"
         icon_left_color: 1, 0, 0, 1

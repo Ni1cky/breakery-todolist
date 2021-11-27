@@ -10,15 +10,20 @@ from kivymd.uix.navigationdrawer import MDNavigationDrawer
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.textfield import MDTextField
+from kivymd.uix.toolbar import MDToolbar
 import tasks_manager
 from constants import *
 from kivymd.app import MDApp
-from kivy.properties import ObjectProperty, StringProperty
-from kivy.uix.screenmanager import ScreenManager, NoTransition
+from kivy.properties import ObjectProperty
+from kivy.uix.screenmanager import NoTransition, ScreenManager
+
+
+def get_main_container():
+    return MDApp.get_running_app().get_main_container()
 
 
 def get_screen_manager() -> ScreenManager:
-    return MDApp.get_running_app().get_main_container().get_screen_manager()
+    return get_main_container().get_screen_manager()
 
 
 def get_tasks_manager():
@@ -27,6 +32,7 @@ def get_tasks_manager():
 
 class TasksScreen(MDScreen):
     tasks: GridLayout = ObjectProperty()
+    calling_button: OneLineIconListItem = ObjectProperty()
 
     def get_tasktext_for_searching(self):
         return MDApp.get_running_app().get_main_container().toolbar.search_text_field.text
@@ -154,6 +160,7 @@ class Task(MDBoxLayout):
 
 class ToolBar(MDBoxLayout):
     search_text_field: MDTextField = ObjectProperty()
+    left_toolbar: MDToolbar = ObjectProperty()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -247,12 +254,27 @@ class MenuButton(OneLineIconListItem):
         if screen_name:
             self.screen_name = screen_name
 
+    def mark_active(self, prev):
+        self.bg_color = list(map(lambda x: x - TASK_BUTTON_ACTIVE_COLOR_DELTA, TASK_BUTTON_DEFAULT_COLOR))
+        container: MainContainer = get_main_container()
+        container.toolbar.left_toolbar.title = self.text
+        if prev:
+            prev.bg_color = TASK_BUTTON_DEFAULT_COLOR
+
     def change_screen(self):
         screen_manager = get_screen_manager()
+
         if screen_manager.current == self.screen_name:
+            screen_manager.current_screen.calling_button = self
             return
+
+        self.mark_active(screen_manager.current_screen.calling_button)
+
         screen_manager.current_screen.delete_all_tasks()
+
         screen_manager.current = self.screen_name
+        screen_manager.current_screen.calling_button = self
+
         get_tasks_manager().reload_current_screen()
 
 
@@ -277,6 +299,7 @@ class ScrollViewTasksList(ScrollView):
         new_list = MenuButton(screen_name=screen_name)
         new_list.text = list_name
         self.screens_list.add_widget(new_list)
+        self.new_list_field.text = ""
 
 
 class LowerMenuLayout(MDBoxLayout):
@@ -291,7 +314,7 @@ class UpperMenuLayout(MDBoxLayout):
     '''
     Тут верхняя часть меню
     '''
-    pass
+    start_button: MenuButton = ObjectProperty()
 
 
 class MainMenuLayout(MDNavigationDrawer):
@@ -399,7 +422,8 @@ class MainContainer(MDBoxLayout):
 
         tasks_lists_list = self.main_menu.lower.task_screens_scroll_view.screens_list
         for menu_button_text in save.keys():
-            tasks_lists_list.add_widget(MenuButton(text=menu_button_text, screen_name=save[menu_button_text]["screen_name"]))
+            tasks_lists_list.add_widget(
+                MenuButton(text=menu_button_text, screen_name=save[menu_button_text]["screen_name"]))
             self.screen_manager.add_widget(TasksScreen(name=save[menu_button_text]["screen_name"]))
 
         tasks_man.reload_all_screens()
@@ -409,7 +433,6 @@ class TodoApp(MDApp):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.tasks_manager = tasks_manager.TasksManager()
-        self.main_container = None
 
     def build(self):
         self.main_container = MainContainer()
@@ -418,6 +441,7 @@ class TodoApp(MDApp):
     def on_start(self):
         self.main_container.load_tasks()
         self.main_container.load_screens()
+        self.main_container.main_menu.upper.start_button.mark_active(None)
 
     def on_stop(self):
         self.main_container.save_tasks()
