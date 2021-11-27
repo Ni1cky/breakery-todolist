@@ -114,17 +114,18 @@
 
 
 <LowerMenuLayout>:
-    orientation: "vertical"
     task_screens_scroll_view: task_screens_scroll_view
+
+    orientation: "vertical"
     ScrollViewTasksList:
         id: task_screens_scroll_view
         new_list_field: new_list_field
     MDBoxLayout:
         orientation: "horizontal"
-
         MDTextField:
             id: new_list_field
             hint_text: "Введите название списка"
+            on_text_validate: task_screens_scroll_view.add_new_list()
         MDIconButton:
             on_press: task_screens_scroll_view.add_new_list()
             icon:"plus"

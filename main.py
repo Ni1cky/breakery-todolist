@@ -1,11 +1,9 @@
 import json
 import os
-
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDIconButton
-from kivymd.uix.list import MDList, OneLineAvatarIconListItem, OneLineIconListItem
 from kivymd.uix.list import OneLineIconListItem, MDList
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.navigationdrawer import MDNavigationDrawer
@@ -13,11 +11,10 @@ from kivymd.uix.screen import MDScreen
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.textfield import MDTextField
 from kivymd.uix.toolbar import MDToolbar
-
 import tasks_manager
 from constants import *
 from kivymd.app import MDApp
-from kivy.properties import ObjectProperty, StringProperty
+from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import NoTransition, ScreenManager
 
 
@@ -36,9 +33,6 @@ def get_tasks_manager():
 class TasksScreen(MDScreen):
     tasks: GridLayout = ObjectProperty()
     calling_button: OneLineIconListItem = ObjectProperty()
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
 
     def get_tasktext_for_searching(self):
         return MDApp.get_running_app().get_main_container().toolbar.search_text_field.text
@@ -167,6 +161,7 @@ class Task(MDBoxLayout):
 class ToolBar(MDBoxLayout):
     search_text_field: MDTextField = ObjectProperty()
     left_toolbar: MDToolbar = ObjectProperty()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         theme_items = [
@@ -304,6 +299,7 @@ class ScrollViewTasksList(ScrollView):
         new_list = MenuButton(screen_name=screen_name)
         new_list.text = list_name
         self.screens_list.add_widget(new_list)
+        self.new_list_field.text = ""
 
 
 class LowerMenuLayout(MDBoxLayout):
