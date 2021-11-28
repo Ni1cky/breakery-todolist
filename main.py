@@ -50,7 +50,8 @@ class TasksScreen(MDScreen):
 
     def import_tasks(self, tasks):
         for task in tasks:
-            self.add_task(task)
+            if not task.is_done or self.name == "done_tasks":
+                self.add_task(task)
 
     def search_task(self):
         self.delete_all_tasks()
