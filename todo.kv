@@ -83,6 +83,10 @@
         id: task_text_field
         hint_text: "Переименовать"
         font_size: 20
+        line_color_focus: 0, 0, 0, 1
+        hint_text_color_focus: 0, 0, 0, 1
+        text_color_normal: 0, 0, 0, 1
+        text_color_focus: 0, 0, 0, 1
         on_text: root.change_task_text()
     MDBoxLayout:
         size_hint_y: 0.3
@@ -233,6 +237,11 @@
         MDTextField:
             id: new_list_field
             hint_text: "Введите название списка"
+            multiline: False
+            line_color_focus: 0, 0, 0, 1
+            hint_text_color_focus: 0, 0, 0, 1
+            text_color_normal: 0, 0, 0, 1
+            text_color_focus: 0, 0, 0, 1
         MDIconButton:
             on_press: task_screens_scroll_view.add_new_list()
             icon:"plus"
