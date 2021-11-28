@@ -42,8 +42,8 @@
         size_hint: 0.1, 1
         MDIconButton:
             icon: 'cards-heart-outline'
-            # icon: 'cards-heart'
-            # text_color: "#FF0000"
+#            icon: 'cards-heart'
+#            text_color: "#FF0000"
             theme_text_color: 'Custom'
             text_color: "#FFFFFF"
             on_press: root.make_important()
@@ -143,12 +143,20 @@
     MDBoxLayout:
         size_hint_y: 0.15
         AnchorLayout:
-            size_hint_x: 0.8
+            size_hint_x: 0.7
             MDLabel:
                 halign: "left"
                 text: "Приоритетность"
                 theme_text_color: 'Custom'
                 text_color: 0, 0, 0, 0.7
+        AnchorLayout:
+            size_hint_x: 0.1
+            MDIconButton:
+                pos_hint: {"center_x": .5, "center_y": .5}
+                icon: "playlist-edit"
+                theme_text_color: 'Custom'
+                text_color: 0, 0, 0, 0.7
+                on_press: root.open_priority_menu(self)
         AnchorLayout:
             size_hint_x: 0.2
             MDLabel:

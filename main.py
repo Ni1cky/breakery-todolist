@@ -13,6 +13,8 @@ from kivymd.uix.pickers import MDDatePicker
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.textfield import MDTextField
+
+import constants
 import tasks_manager
 from constants import *
 from kivymd.app import MDApp
@@ -41,6 +43,7 @@ class Task(MDBoxLayout):
         self.task_id = task_id
         self.task_input_field.text = task_text
         self.deadline = ""
+        self.priority = ""
         self.belongs_to = {"tasks", }
         self.is_done = False
         self.is_important = False
@@ -58,6 +61,12 @@ class Task(MDBoxLayout):
     def mark_done(self):
         self.is_done = not self.is_done
         self.task_checkbox.active = self.is_done
+
+    def get_priority(self):
+        return self.priority
+
+    def set_priority(self, priority):
+        self.priority = constants.PRIORITY[priority]
 
     def set_text(self, text):
         self.task_input_field.text = text
@@ -108,6 +117,43 @@ class TasksMenuDrawer(MDNavigationDrawer):
                               max_date=datetime.date(datetime.date.today().year + 4, 1, 1))
         picker.bind(on_save=self.on_save)
         picker.open()
+
+    def open_priority_menu(self, instance):
+        menu_items = [
+            {
+                "text": "Очень важно",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda: self.task.set_priority("Очень важно")
+            },
+            {
+                "text": "Важно",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda: self.task.set_priority("Важно")
+            },
+            {
+                "text": "Средняя",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda: self.task.set_priority("Обычная")
+            },
+            {
+                "text": "Низкая",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda: self.task.set_priority("Низкая")
+            },
+            {
+                "text": "Очень низкая",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda: self.task.set_priority("Очень низкая")
+            }
+        ]
+
+        self.menu = MDDropdownMenu(
+            items=menu_items,
+            width_mult=7
+        )
+
+        self.menu.caller = instance
+        self.menu.open()
 
 
 class TasksScreen(MDScreen):
