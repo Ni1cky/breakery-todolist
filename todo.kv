@@ -168,6 +168,7 @@
         # заглушка
 
 
+
 <ScrollViewTasksList>:
     screens_list: screens_list
     ScrollView:
@@ -175,24 +176,20 @@
             id: screens_list
 
 
-<SettingsScreen>:
-    MDRaisedButton:
-        id: button
-        text: "Выбор цветовой темы"
-        pos_hint: {"center_x": .5, "center_y": .5}
-        on_release: app.menu.open()
-
 <MenuButton>:
     theme_text_color: "Custom"
     text_color: 0, 0, 0, 1
     icn: ""
     on_press: self.change_screen()
+
     IconLeftWidgetWithoutTouch:
         icon: root.icn
         theme_text_color: "Custom"
         text_color: 0, 0, 0, 1
 
+
 <UpperMenuLayout>:
+    start_button: tasks_button
     orientation: "vertical"
     padding: "8dp"
     spacing: "8dp"
@@ -202,6 +199,7 @@
         font_size: 20
         size_hint_y: None
         height: self.texture_size[1]
+
 
     MDLabel:
         text: "Авторы: Nicky, !!!, GOGX31, VadLord, RegreTTO, dion, Хитрый Страус"
@@ -214,6 +212,11 @@
         icn: "home"
         text: "Задачи"
     MenuButton:
+        id: done_tasks_button
+        screen_name: "done_tasks"
+        icn: "check-circle-outline"
+        text: "Сделано"
+    MenuButton:
         id: important_button
         screen_name: "important"
         icn: "cards-heart"
@@ -224,19 +227,20 @@
         icn: "calendar"
         text: "Мой день"
 
+
 <LowerMenuLayout>:
-    orientation: "vertical"
     task_screens_scroll_view: task_screens_scroll_view
+
+    orientation: "vertical"
     ScrollViewTasksList:
         id: task_screens_scroll_view
         new_list_field: new_list_field
-
     MDBoxLayout:
         orientation: "horizontal"
-
         MDTextField:
             id: new_list_field
             hint_text: "Введите название списка"
+            on_text_validate: task_screens_scroll_view.add_new_list()
             multiline: False
             line_color_focus: 0, 0, 0, 1
             hint_text_color_focus: 0, 0, 0, 1
@@ -258,8 +262,11 @@
     id: nav_bar
     UpperMenuLayout:
         id: upper
+        size_hint_y: 0.65
     LowerMenuLayout:
         id: lower
+        size_hint_y: 0.35
+
 
 <MainContainer>:
     screen_manager: screen_manager
@@ -273,7 +280,10 @@
         ScreenManager:
             id: screen_manager
             TasksScreen:
+                calling_button: main_menu.upper.start_button
                 name: "tasks"
+            TasksScreen:
+                name: "done_tasks"
             TasksScreen:
                 name: "important"
             TasksScreen:
@@ -284,8 +294,11 @@
 
 <ToolBar>:
     search_text_field: search_text_field
+    left_toolbar: ltbr
     MDToolbar:
+        id: ltbr
         size_hint_x: 0.45
+        title: "asdasdasdasdasda"
         left_action_items: [["menu", root.open_menu]]
         theme_text_color: "Custom"
         icon_left_color: 1, 0, 0, 1
@@ -317,7 +330,10 @@
         size_hint_x: 0.25
         right_action_items: [["sort", root.open_sort_menu], ["brush", root.open_theme_menu]]
 
-<RightContentCls>
+
+<RightContentCls@OneLineAvatarIconListItem>
+    left_icon: ""
+    text: ""
     IconLeftWidget:
         icon: root.left_icon
 
