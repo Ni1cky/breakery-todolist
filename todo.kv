@@ -71,11 +71,10 @@
 
 <TasksMenuDrawer>:
     task_text_field: task_text_field
-    completed: completed
-    deadline_text: deadline_text
-    make_important: make_important
+    done_checkbox: done_checkbox
+    deadline_label: deadline_label
+    important_button: important_button
     orientation: "vertical"
-    halign: "top"
     state: "close"
     md_bg_color: 1, 1, 1, 1
     anchor: "right"
@@ -83,6 +82,7 @@
         id: task_text_field
         hint_text: "Переименовать"
         font_size: 20
+        on_text: root.change_task_text()
     MDBoxLayout:
         size_hint_y: 0.3
         orientation:"vertical"
@@ -99,11 +99,12 @@
             AnchorLayout:
                 size_hint_x: 0.2
                 MDCheckbox:
-                    id: completed
+                    id: done_checkbox
                     valign: "center"
                     halign: "center"
                     selected_color: "#00BFFF"
                     unselected_color: 0, 0, 0, 1
+                    on_press: root.mark_done()
         MDBoxLayout:
             orientation: "horizontal"
             AnchorLayout:
@@ -111,7 +112,7 @@
                 MDLabel:
                     halign: "left"
                     valign: "center"
-                    text: "Добавить в важные"
+                    text: "Важно"
                     theme_text_color: "Custom"
                     text_color: 0, 0, 0, 0.7
             AnchorLayout:
@@ -119,7 +120,7 @@
                 MDIconButton:
                     pos_hint: {"center_x": .5, "center_y": .5}
                     icon: 'cards-heart-outline'
-                    id: make_important
+                    id: important_button
                     on_press: root.make_important()
                     theme_text_color: 'Custom'
                     text_color: "#000000"
@@ -129,22 +130,23 @@
         AnchorLayout:
             size_hint_x: 0.8
             MDLabel:
-                id: deadline_text
+                id: deadline_label
                 halign: "left"
-                text:"11.11.1111"
+                text: "Дедлайн: "
                 theme_text_color: 'Custom'
                 text_color: 0, 0, 0, 0.7
         AnchorLayout:
             size_hint_x: 0.2
             MDIconButton:
                 icon: "calendar"
+                on_press: root.open_calendar()
     MDBoxLayout:
         size_hint_y: 0.15
         AnchorLayout:
             size_hint_x: 0.8
             MDLabel:
                 halign: "left"
-                text: "выберите уровень приоритетности"
+                text: "Приоритетность"
                 theme_text_color: 'Custom'
                 text_color: 0, 0, 0, 0.7
         AnchorLayout:

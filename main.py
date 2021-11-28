@@ -9,7 +9,7 @@ from kivymd.uix.label import MDLabel
 from kivymd.uix.list import OneLineIconListItem, OneLineAvatarIconListItem, MDList
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.navigationdrawer import MDNavigationDrawer
-from kivymd.uix.picker import MDDatePicker
+from kivymd.uix.pickers import MDDatePicker
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.textfield import MDTextField
@@ -36,11 +36,11 @@ class Task(MDBoxLayout):
     Класс задачи
     '''
 
-    def __init__(self, task_id=-1, task_text="", deadline=datetime.date.today().strftime("%d-%m-%y"), **kwargs):
+    def __init__(self, task_id=-1, task_text="", **kwargs):
         super().__init__(**kwargs)
         self.task_id = task_id
         self.task_input_field.text = task_text
-        self.deadline = deadline
+        self.deadline = ""
         self.belongs_to = {"tasks", }
         self.is_done = False
         self.is_important = False
@@ -48,12 +48,6 @@ class Task(MDBoxLayout):
     def update_parents(self, belongs_to):
         for parent in belongs_to:
             self.belongs_to.add(parent)
-
-    def set_deadline(self, new_deadline):
-        self.deadline = new_deadline
-
-    def get_deadline(self):
-        return self.deadline
 
     def delete(self):
         get_tasks_manager().delete_task(self.task_id)
@@ -71,44 +65,43 @@ class Task(MDBoxLayout):
     def get_text(self):
         return self.task_input_field.text
 
-    def is_completed(self):
-        return self.is_done
-
     def open_additional_info(self):
-        info = TasksMenuDrawer(self.task_id)
+        info: TasksMenuDrawer = get_current_screen().info_drawer
+        info.load_task(self.task_id)
         info.open()
 
 
 class TasksMenuDrawer(MDNavigationDrawer):
     task_text_field: MDTextField = ObjectProperty()
-    completed: MDCheckbox = ObjectProperty()
-    make_important: MDIconButton = ObjectProperty()
-    deadline_text: MDLabel = ObjectProperty()
+    done_checkbox: MDCheckbox = ObjectProperty()
+    important_button: MDIconButton = ObjectProperty()
+    deadline_label: MDLabel = ObjectProperty()
 
-    def __init__(self, task_id: int = -1, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.task_id = task_id
-        if self.task_id != -1:
-            self.task: Task = get_tasks_manager().get_task(self.task_id)
-            self.init_drawer()
+        self.task = None
 
-    def init_drawer(self):
-        self.completed.active = self.task.is_completed()
+    def load_task(self, task_id):
+        self.task = get_tasks_manager().get_task(task_id)
         self.task_text_field.text = self.task.get_text()
-        self.deadline_text.text = self.task.get_deadline()
+        self.done_checkbox.active = self.task.is_done
+        self.deadline_label.text = "Дедлайн: " + self.task.deadline
 
     def make_important(self):
-        self.task.is_important = not self.task.is_important
+        self.task.make_important()
 
     def open(self):
         self.set_state("open")
 
-    def apply_changes(self):
+    def mark_done(self):
+        self.task.mark_done()
+
+    def change_task_text(self):
         self.task.set_text(self.task_text_field.text)
-        self.task.is_done = self.completed.state
 
     def on_save(self, instance, value, date_range):
-        self.task.set_deadline(value)
+        self.deadline_label.text = "Дедлайн: " + str(value)
+        self.task.deadline = str(value)
 
     def open_calendar(self):
         picker = MDDatePicker(min_date=datetime.date.today(),
