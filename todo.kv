@@ -74,6 +74,7 @@
     done_checkbox: done_checkbox
     deadline_label: deadline_label
     important_button: important_button
+    priority_label: priority_label
     orientation: "vertical"
     state: "close"
     md_bg_color: 1, 1, 1, 1
@@ -132,7 +133,7 @@
             MDLabel:
                 id: deadline_label
                 halign: "left"
-                text: "Дедлайн: "
+                text: "Дедлайн "
                 theme_text_color: 'Custom'
                 text_color: 0, 0, 0, 0.7
         AnchorLayout:
@@ -143,25 +144,21 @@
     MDBoxLayout:
         size_hint_y: 0.15
         AnchorLayout:
-            size_hint_x: 0.7
+            size_hint_x: 0.8
             MDLabel:
+                id: priority_label
                 halign: "left"
                 text: "Приоритетность"
                 theme_text_color: 'Custom'
                 text_color: 0, 0, 0, 0.7
         AnchorLayout:
-            size_hint_x: 0.1
+            size_hint_x: 0.2
             MDIconButton:
                 pos_hint: {"center_x": .5, "center_y": .5}
                 icon: "playlist-edit"
                 theme_text_color: 'Custom'
                 text_color: 0, 0, 0, 0.7
                 on_press: root.open_priority_menu(self)
-        AnchorLayout:
-            size_hint_x: 0.2
-            MDLabel:
-                halign: "center"
-                text: "0"
     MDBoxLayout:
         size_hint_y: 0.3
         # заглушка
@@ -186,10 +183,10 @@
     text_color: 0, 0, 0, 1
     icn: ""
     on_press: self.change_screen()
-#    IconLeftWidgetWithoutTouch:
-#        icon: root.icn
-#        theme_text_color: "Custom"
-#        text_color: 0, 0, 0, 1
+    IconLeftWidgetWithoutTouch:
+        icon: root.icn
+        theme_text_color: "Custom"
+        text_color: 0, 0, 0, 1
 
 <UpperMenuLayout>:
     orientation: "vertical"
@@ -259,7 +256,6 @@
     screen_manager: screen_manager
     main_menu: main_menu
     toolbar: toolbar
-#    tasks_bar: tasks_bar
     orientation: "vertical"
     ToolBar:
         id: toolbar
@@ -275,8 +271,7 @@
                 name: "my_day"
         MainMenuLayout:
             id: main_menu
-#        TasksMenuDrawer:
-#            id:tasks_bar
+
 
 <ToolBar>:
     search_text_field: search_text_field

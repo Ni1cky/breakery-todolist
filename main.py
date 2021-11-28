@@ -13,8 +13,6 @@ from kivymd.uix.pickers import MDDatePicker
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.textfield import MDTextField
-
-import constants
 import tasks_manager
 from constants import *
 from kivymd.app import MDApp
@@ -43,7 +41,7 @@ class Task(MDBoxLayout):
         self.task_id = task_id
         self.task_input_field.text = task_text
         self.deadline = ""
-        self.priority = ""
+        self.priority = 3
         self.belongs_to = {"tasks", }
         self.is_done = False
         self.is_important = False
@@ -62,11 +60,8 @@ class Task(MDBoxLayout):
         self.is_done = not self.is_done
         self.task_checkbox.active = self.is_done
 
-    def get_priority(self):
-        return self.priority
-
     def set_priority(self, priority):
-        self.priority = constants.PRIORITY[priority]
+        self.priority = PRIORITY_TO_NUMBER[priority]
 
     def set_text(self, text):
         self.task_input_field.text = text
@@ -85,6 +80,7 @@ class TasksMenuDrawer(MDNavigationDrawer):
     done_checkbox: MDCheckbox = ObjectProperty()
     important_button: MDIconButton = ObjectProperty()
     deadline_label: MDLabel = ObjectProperty()
+    priority_label: MDLabel = ObjectProperty()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -94,7 +90,8 @@ class TasksMenuDrawer(MDNavigationDrawer):
         self.task = get_tasks_manager().get_task(task_id)
         self.task_text_field.text = self.task.get_text()
         self.done_checkbox.active = self.task.is_done
-        self.deadline_label.text = "Дедлайн: " + self.task.deadline
+        self.deadline_label.text = "Дедлайн " + self.task.deadline
+        self.priority_label.text = "Приоритетность " + NUMBER_TO_PRIORITY[self.task.priority]
 
     def make_important(self):
         self.task.make_important()
@@ -109,7 +106,7 @@ class TasksMenuDrawer(MDNavigationDrawer):
         self.task.set_text(self.task_text_field.text)
 
     def on_save(self, instance, value, date_range):
-        self.deadline_label.text = "Дедлайн: " + str(value)
+        self.deadline_label.text = "Дедлайн " + str(value)
         self.task.deadline = str(value)
 
     def open_calendar(self):
@@ -118,42 +115,46 @@ class TasksMenuDrawer(MDNavigationDrawer):
         picker.bind(on_save=self.on_save)
         picker.open()
 
+    def set_priority(self, priority):
+        self.task.set_priority(priority)
+        self.priority_label.text = "Приоритетность " + priority
+
     def open_priority_menu(self, instance):
         menu_items = [
             {
-                "text": "Очень важно",
+                "text": "Очень важная",
                 "viewclass": "OneLineListItem",
-                "on_release": lambda: self.task.set_priority("Очень важно")
+                "on_release": lambda: self.set_priority("Очень важная")
             },
             {
-                "text": "Важно",
+                "text": "Важная",
                 "viewclass": "OneLineListItem",
-                "on_release": lambda: self.task.set_priority("Важно")
+                "on_release": lambda: self.set_priority("Важная")
             },
             {
                 "text": "Средняя",
                 "viewclass": "OneLineListItem",
-                "on_release": lambda: self.task.set_priority("Обычная")
+                "on_release": lambda: self.set_priority("Обычная")
             },
             {
                 "text": "Низкая",
                 "viewclass": "OneLineListItem",
-                "on_release": lambda: self.task.set_priority("Низкая")
+                "on_release": lambda: self.set_priority("Низкая")
             },
             {
                 "text": "Очень низкая",
                 "viewclass": "OneLineListItem",
-                "on_release": lambda: self.task.set_priority("Очень низкая")
+                "on_release": lambda: self.set_priority("Очень низкая")
             }
         ]
 
-        self.menu = MDDropdownMenu(
+        menu = MDDropdownMenu(
             items=menu_items,
-            width_mult=7
+            width_mult=3,
         )
 
-        self.menu.caller = instance
-        self.menu.open()
+        menu.caller = instance
+        menu.open()
 
 
 class TasksScreen(MDScreen):
@@ -447,6 +448,8 @@ class MainContainer(MDBoxLayout):
             if task_params["is_done"]:
                 task.mark_done()
             task.update_parents(task_params["belongs_to"])
+            task.priority = task_params["priority"]
+            task.deadline = task_params["deadline"]
             tasks_man.add_new_task(task)
         tasks_man.reload_current_screen()
 
@@ -464,6 +467,8 @@ class MainContainer(MDBoxLayout):
             cur_task["is_important"] = task.is_important
             cur_task["is_done"] = task.is_done
             cur_task["belongs_to"] = list(task.belongs_to)
+            cur_task["deadline"] = task.deadline
+            cur_task["priority"] = task.priority
 
         with open(self.TASKS_SAVE_PATH, 'w') as f:
             json.dump(data, f)
