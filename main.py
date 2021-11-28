@@ -91,7 +91,7 @@ class TasksMenuDrawer(MDNavigationDrawer):
                 "on_release": lambda: self.set_priority("Важная")
             },
             {
-                "text": "Средняя",
+                "text": "Обычная",
                 "viewclass": "OneLineListItem",
                 "on_release": lambda: self.set_priority("Обычная")
             },
