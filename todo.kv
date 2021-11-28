@@ -53,37 +53,31 @@
             icon: 'delete'
             theme_text_color: 'Custom'
             text_color: 1, 1, 1, 1
-            on_press: root.delete_task()
+            on_press: root.delete()
             id: delete_btn
 
-<ScrollViewTasksList>:
-    ScrollView:
 
-<SettingsScreen>:
-    MDRaisedButton:
-        id: button
-        text: "Выбор цветовой темы"
-        pos_hint: {"center_x": .5, "center_y": .5}
-        on_release: app.menu.open()
+<ScrollViewTasksList>:
+    screens_list: screens_list
+    ScrollView:
+        MDList:
+            id: screens_list
+
 
 <MenuButton>:
     theme_text_color: "Custom"
     text_color: 0, 0, 0, 1
     icn: ""
     on_press: self.change_screen()
+
     IconLeftWidgetWithoutTouch:
         icon: root.icn
         theme_text_color: "Custom"
         text_color: 0, 0, 0, 1
 
 
-<LowerMenuLayout>:
-    ScrollViewTasksList:
-    MDIconButton:
-	    on_press: root.children[0].add_new_list()
-        icon:"plus"
-
 <UpperMenuLayout>:
+    start_button: tasks_button
     orientation: "vertical"
     padding: "8dp"
     spacing: "8dp"
@@ -93,6 +87,7 @@
         font_size: 20
         size_hint_y: None
         height: self.texture_size[1]
+
 
     MDLabel:
         text: "Авторы: Nicky, !!!, GOGX31, VadLord, RegreTTO, dion, Хитрый Страус"
@@ -105,6 +100,11 @@
         icn: "home"
         text: "Задачи"
     MenuButton:
+        id: done_tasks_button
+        screen_name: "done_tasks"
+        icn: "home"
+        text: "Сделано"
+    MenuButton:
         id: important_button
         screen_name: "important"
         icn: "cards-heart"
@@ -114,6 +114,25 @@
         screen_name: "my_day"
         icn: "calendar"
         text: "Мой день"
+
+
+<LowerMenuLayout>:
+    task_screens_scroll_view: task_screens_scroll_view
+
+    orientation: "vertical"
+    ScrollViewTasksList:
+        id: task_screens_scroll_view
+        new_list_field: new_list_field
+    MDBoxLayout:
+        orientation: "horizontal"
+        MDTextField:
+            id: new_list_field
+            hint_text: "Введите название списка"
+            on_text_validate: task_screens_scroll_view.add_new_list()
+        MDIconButton:
+            on_press: task_screens_scroll_view.add_new_list()
+            icon:"plus"
+
 
 <MainMenuLayout>:
     upper: upper
@@ -126,8 +145,11 @@
     id: nav_bar
     UpperMenuLayout:
         id: upper
+        size_hint_y: 0.65
     LowerMenuLayout:
         id: lower
+        size_hint_y: 0.35
+
 
 <MainContainer>:
     screen_manager: screen_manager
@@ -137,21 +159,29 @@
     ToolBar:
         id: toolbar
         size_hint_y: 64 / root.height
-        open_menu: root.open_menu
-        search_task: root.search_task
-        sort_tasks: root.sort_tasks
-        open_settings: root.open_settings
     MDNavigationLayout:
         ScreenManager:
-            on_current: root.open_screen_properly()
             id: screen_manager
+            TasksScreen:
+                calling_button: main_menu.upper.start_button
+                name: "tasks"
+            TasksScreen:
+                name: "done_tasks"
+            TasksScreen:
+                name: "important"
+            TasksScreen:
+                name: "my_day"
         MainMenuLayout:
             id: main_menu
 
+
 <ToolBar>:
     search_text_field: search_text_field
+    left_toolbar: ltbr
     MDToolbar:
+        id: ltbr
         size_hint_x: 0.45
+        title: "asdasdasdasdasda"
         left_action_items: [["menu", root.open_menu]]
         theme_text_color: "Custom"
         icon_left_color: 1, 0, 0, 1
@@ -181,7 +211,14 @@
             on_text: root.search_task()
     MDToolbar:
         size_hint_x: 0.25
-        right_action_items: [["magnify"], ["sort", root.sort_tasks], ["cog", root.open_settings]]
+        right_action_items: [["sort", root.open_sort_menu], ["brush", root.open_theme_menu]]
+
+
+<RightContentCls@OneLineAvatarIconListItem>
+    left_icon: ""
+    text: ""
+    IconLeftWidget:
+        icon: root.left_icon
 
 
 <TasksScreen>:
@@ -209,4 +246,4 @@
             theme_text_color: 'Custom'
             text_color: 1, 1, 1, 1
             user_font_size: "45sp"
-            on_press: root.add_task()
+            on_press: root.add_new_task()
