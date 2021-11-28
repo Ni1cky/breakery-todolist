@@ -7,7 +7,6 @@ from kivy.uix.scrollview import ScrollView
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDIconButton
 from kivymd.uix.label import MDLabel
-from kivymd.uix.list import OneLineIconListItem, OneLineAvatarIconListItem, MDList
 from kivymd.uix.list import OneLineIconListItem, MDList
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.navigationdrawer import MDNavigationDrawer
@@ -33,53 +32,6 @@ def get_screen_manager() -> ScreenManager:
 
 def get_tasks_manager():
     return MDApp.get_running_app().get_tasks_manager()
-
-
-class Task(MDBoxLayout):
-    task_checkbox: MDCheckbox = ObjectProperty()
-    task_input_field: MDTextField = ObjectProperty()
-    make_imp_btn: MDIconButton = ObjectProperty()
-    '''
-    Класс задачи
-    '''
-
-    def __init__(self, task_id=-1, task_text="", **kwargs):
-        super().__init__(**kwargs)
-        self.task_id = task_id
-        self.task_input_field.text = task_text
-        self.deadline = ""
-        self.priority = 3
-        self.belongs_to = {"tasks", }
-        self.is_done = False
-        self.is_important = False
-
-    def update_parents(self, belongs_to):
-        for parent in belongs_to:
-            self.belongs_to.add(parent)
-
-    def delete(self):
-        get_tasks_manager().delete_task(self.task_id)
-
-    def make_important(self):
-        self.is_important = not self.is_important
-
-    def mark_done(self):
-        self.is_done = not self.is_done
-        self.task_checkbox.active = self.is_done
-
-    def set_priority(self, priority):
-        self.priority = PRIORITY_TO_NUMBER[priority]
-
-    def set_text(self, text):
-        self.task_input_field.text = text
-
-    def get_text(self):
-        return self.task_input_field.text
-
-    def open_additional_info(self):
-        info: TasksMenuDrawer = get_current_screen().info_drawer
-        info.load_task(self.task_id)
-        info.open()
 
 
 class TasksMenuDrawer(MDNavigationDrawer):
@@ -273,6 +225,9 @@ class Task(MDBoxLayout):
 
         self.belongs_to = {"tasks", }
 
+        self.deadline = ""
+
+        self.priority = 3
         self.is_done = False
         self.is_important = False
 
@@ -310,6 +265,14 @@ class Task(MDBoxLayout):
         get_screen_manager().current_screen.reload()
         self.task_checkbox.active = self.is_done
 
+    def set_priority(self, priority):
+        self.priority = PRIORITY_TO_NUMBER[priority]
+
+    def open_additional_info(self):
+        info: TasksMenuDrawer = get_current_screen().info_drawer
+        info.load_task(self.task_id)
+        info.open()
+
     def repaint(self):
         for child in self.canvas.children:
             if isinstance(child, Color):
@@ -322,6 +285,9 @@ class Task(MDBoxLayout):
 
     def get_text(self):
         return self.task_input_field.text
+
+    def set_text(self, text):
+        self.task_input_field.text = text
 
 
 class ToolBar(MDBoxLayout):
@@ -374,7 +340,7 @@ class ToolBar(MDBoxLayout):
                 "on_release": self.sort_task_important_down
             }
         ]
-        self.menu = MDDropdownMenu(
+        self.sort_menu = MDDropdownMenu(
             items=menu_items,
             width_mult=7,
         )
@@ -391,8 +357,8 @@ class ToolBar(MDBoxLayout):
         MDApp.get_running_app().get_main_container().open_menu()
 
     def open_sort_menu(self, instance):
-        self.menu.caller = instance
-        self.menu.open()
+        self.sort_menu.caller = instance
+        self.sort_menu.open()
 
     def sort_task_important_up(self):
         get_screen_manager().current_screen.sort_task_important_up()
@@ -499,11 +465,6 @@ class MainContainer(MDBoxLayout):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.SAVE_FOLDER = SAVE_FOLDER
-        self.TASKS_SAVE_NAME = TASKS_SAVE_NAME
-        self.TASKS_SAVE_PATH = TASKS_SAVE_PATH
-        self.SCREENS_SAVE_PATH = SCREENS_SAVE_PATH
-        self.SCREENS_SAVE_NAME = SCREENS_SAVE_NAME
 
         self.screen_manager.transition = NoTransition()
 
@@ -515,18 +476,18 @@ class MainContainer(MDBoxLayout):
 
     def load_tasks(self):
         if (
-                not os.path.exists(self.SAVE_FOLDER) or
-                os.listdir(self.SAVE_FOLDER) == [".gitignore"] or
-                f"{self.TASKS_SAVE_NAME}.json" not in os.listdir(self.SAVE_FOLDER)
+                not os.path.exists(SAVE_FOLDER) or
+                os.listdir(SAVE_FOLDER) == [".gitignore"] or
+                f"{TASKS_SAVE_NAME}.json" not in os.listdir(SAVE_FOLDER)
         ):
             return
 
-        with open(self.TASKS_SAVE_PATH, "r") as f:
+        with open(TASKS_SAVE_PATH, "r") as f:
             save = json.load(f)
 
         tasks_man = get_tasks_manager()
 
-        save: dict = save[self.TASKS_SAVE_NAME]
+        save: dict = save[TASKS_SAVE_NAME]
         for task_id in save.keys():
             task_params = save[task_id]
             task = Task(task_id=int(task_id), task_text=task_params["text"])
@@ -538,17 +499,16 @@ class MainContainer(MDBoxLayout):
             task.update_parents(task_params["belongs_to"])
             task.priority = task_params["priority"]
             task.deadline = task_params["deadline"]
-            tasks_man.add_new_task(task)
         tasks_man.reload_current_screen()
 
     def save_tasks(self):
-        if not os.path.exists(self.SAVE_FOLDER):
-            os.mkdir(self.SAVE_FOLDER)
-            with open(f"{self.SAVE_FOLDER}/.gitignore", "w") as gitignore:
+        if not os.path.exists(SAVE_FOLDER):
+            os.mkdir(SAVE_FOLDER)
+            with open(f"{SAVE_FOLDER}/.gitignore", "w") as gitignore:
                 gitignore.writelines(["*", "!.gitignore"])
 
-        data = {self.TASKS_SAVE_NAME: {}}
-        cur_save = data[self.TASKS_SAVE_NAME]
+        data = {TASKS_SAVE_NAME: {}}
+        cur_save = data[TASKS_SAVE_NAME]
         for task in get_tasks_manager().tasks:
             cur_task = cur_save[task.task_id] = {}
             cur_task["text"] = task.get_text()
@@ -558,36 +518,36 @@ class MainContainer(MDBoxLayout):
             cur_task["deadline"] = task.deadline
             cur_task["priority"] = task.priority
 
-        with open(self.TASKS_SAVE_PATH, 'w') as f:
+        with open(TASKS_SAVE_PATH, 'w') as f:
             json.dump(data, f)
 
     def save_screens(self):
-        if not os.path.exists(self.SAVE_FOLDER):
-            os.mkdir(self.SAVE_FOLDER)
-            with open(f"{self.SAVE_FOLDER}/.gitignore", "w") as gitignore:
+        if not os.path.exists(SAVE_FOLDER):
+            os.mkdir(SAVE_FOLDER)
+            with open(f"{SAVE_FOLDER}/.gitignore", "w") as gitignore:
                 gitignore.writelines(["*", "!.gitignore"])
 
-        data = {self.SCREENS_SAVE_NAME: {}}
-        cur_save = data[self.SCREENS_SAVE_NAME]
+        data = {SCREENS_SAVE_NAME: {}}
+        cur_save = data[SCREENS_SAVE_NAME]
         for menu_button in self.main_menu.lower.task_screens_scroll_view.screens_list.children:
             menu_button: MenuButton
             cur_screen = cur_save[menu_button.text] = {}
             cur_screen["screen_name"] = menu_button.screen_name
 
-        with open(self.SCREENS_SAVE_PATH, 'w') as f:
+        with open(SCREENS_SAVE_PATH, 'w') as f:
             json.dump(data, f)
 
     def load_screens(self):
         if (
-                not os.path.exists(self.SAVE_FOLDER) or
-                os.listdir(self.SAVE_FOLDER) == [".gitignore"] or
-                f"{self.SCREENS_SAVE_NAME}.json" not in os.listdir(self.SAVE_FOLDER)
+                not os.path.exists(SAVE_FOLDER) or
+                os.listdir(SAVE_FOLDER) == [".gitignore"] or
+                f"{SCREENS_SAVE_NAME}.json" not in os.listdir(SAVE_FOLDER)
         ):
             return
 
-        with open(self.SCREENS_SAVE_PATH, "r") as f:
+        with open(SCREENS_SAVE_PATH, "r") as f:
             save = json.load(f)
-        save: dict = save[self.SCREENS_SAVE_NAME]
+        save: dict = save[SCREENS_SAVE_NAME]
 
         tasks_man = get_tasks_manager()
 
