@@ -152,7 +152,18 @@ class Task(MDBoxLayout):
         get_tasks_manager().delete_task(self.task_id)
 
     def make_important(self):
-        self.is_important = not self.is_important
+        tasks_man: tasks_manager.TasksManager = get_tasks_manager()
+        if not self.is_important:
+            self.make_imp_btn.icon = 'cards-heart'
+            self.make_imp_btn.text_color = "#FF0000"
+            self.is_important = True
+            tasks_man.add_task_to_screen(self.task_id, "important")
+        else:
+            self.make_imp_btn.icon = 'cards-heart-outline'
+            self.make_imp_btn.text_color = "#FFFFFF"
+            self.is_important = False
+            self.belongs_to.remove("important")
+            tasks_man.reload_all_screens()
 
     def mark_done(self):
         self.is_done = not self.is_done

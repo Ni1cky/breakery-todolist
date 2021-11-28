@@ -15,6 +15,9 @@ class TasksManager:
         if get_current_screen().name == "done_tasks":
             task.mark_done()
             return
+        if get_current_screen().name == "important":
+            task.make_important()
+            return
         self.add_task_to_screen(-1, get_screen_manager().current)
 
     def add_task_to_screen(self, task_id, screen_name):
