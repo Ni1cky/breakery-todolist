@@ -1,7 +1,10 @@
 import json
 import os
+
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
+from kivymd.color_definitions import colors
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDIconButton
 from kivymd.uix.list import OneLineIconListItem, MDList
@@ -13,7 +16,7 @@ from kivymd.uix.textfield import MDTextField
 import tasks_manager
 from constants import *
 from kivymd.app import MDApp
-from kivy.properties import ObjectProperty, StringProperty
+from kivy.properties import ObjectProperty, StringProperty, ListProperty, get_color_from_hex
 from kivy.uix.screenmanager import ScreenManager, NoTransition
 
 
@@ -152,21 +155,23 @@ class Task(MDBoxLayout):
         return self.task_input_field.text
 
 
+
 class ToolBar(MDBoxLayout):
     search_text_field: MDTextField = ObjectProperty()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
         theme_items = [
             {
-                "text": "светлая",
+                "text": "Розовая",
                 "viewclass": "OneLineListItem",
-                # "on_release": self.do_sort_tasks_alphabet
+                "on_press": lambda: self.change_color("Pink")
             },
             {
-                "text": "темная",
+                "text": "Yellow",
                 "viewclass": "OneLineListItem",
-                # "on_release": self.sort_tasks_alphabet_reversed
+                "on_press": lambda: self.change_color("Yellow")
             },
             {
                 "text": "бурая",
@@ -209,6 +214,12 @@ class ToolBar(MDBoxLayout):
             items=theme_items,
             width_mult=3,
         )
+
+    def change_color(self, color):
+        MDApp.get_running_app().app_color = color
+
+
+
 
     def open_theme_menu(self, instance):
         self.themes.caller = instance
@@ -406,10 +417,17 @@ class MainContainer(MDBoxLayout):
 
 
 class TodoApp(MDApp):
+    app_color = ObjectProperty()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.tasks_manager = tasks_manager.TasksManager()
         self.main_container = None
+        self.app_color = "Green"
+        self.all_colors = colors
+
+    def color_converter(self, k):
+        return get_color_from_hex(colors[self.app_color][k])
 
     def build(self):
         self.main_container = MainContainer()
