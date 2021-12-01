@@ -81,9 +81,8 @@ class TasksMenuDrawer(MDNavigationDrawer):
         self.task.deadline = str(value)
 
     def open_calendar(self):
-        picker = MDDatePicker()
-        # picker = MDDatePicker(min_date=datetime.date.today(),
-        #                       max_date=datetime.date(datetime.date.today().year + 4, 1, 1))
+        picker = MDDatePicker(min_date=datetime.date.today(),
+                              max_date=datetime.date(datetime.date.today().year + 4, 1, 1))
         picker.bind(on_save=self.on_save)
         picker.open()
 
