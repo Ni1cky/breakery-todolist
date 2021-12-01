@@ -51,6 +51,18 @@ class TasksMenuDrawer(MDNavigationDrawer):
         self.done_checkbox.active = self.task.is_done
         self.deadline_label.text = "Дедлайн " + self.task.deadline
         self.priority_label.text = "Приоритетность " + NUMBER_TO_PRIORITY[self.task.priority]
+        self.compare_data()
+
+    def compare_data(self):
+        if self.task.deadline != "":
+            if datetime.datetime.strptime(self.task.deadline, "%Y-%m-%d") < datetime.datetime.now():
+                self.deadline_label.text_color = "#F2090D"
+        if self.task.is_important:
+            self.important_button.icon = 'cards-heart'
+            self.important_button.text_color = "#FF0000"
+        else:
+            self.important_button.icon = 'cards-heart-outline'
+            self.important_button.text_color = "#000000"
 
     def make_important(self):
         self.task.make_important()
@@ -69,8 +81,9 @@ class TasksMenuDrawer(MDNavigationDrawer):
         self.task.deadline = str(value)
 
     def open_calendar(self):
-        picker = MDDatePicker(min_date=datetime.date.today(),
-                              max_date=datetime.date(datetime.date.today().year + 4, 1, 1))
+        picker = MDDatePicker()
+        # picker = MDDatePicker(min_date=datetime.date.today(),
+        #                       max_date=datetime.date(datetime.date.today().year + 4, 1, 1))
         picker.bind(on_save=self.on_save)
         picker.open()
 
@@ -138,6 +151,10 @@ class TasksScreen(MDScreen):
         for task in tasks:
             if not task.is_done or self.name == "done_tasks":
                 self.add_task(task)
+                task.menu_btn.text_color = "#FFFFFF"
+            if not task.is_done and self.name != "done_tasks" and task.deadline != "":
+                if datetime.datetime.now() > datetime.datetime.strptime(task.deadline, "%Y-%m-%d"):
+                    task.menu_btn.text_color = "#F2090D"
 
     def search_task(self):
         self.delete_all_tasks()
@@ -222,11 +239,8 @@ class Task(MDBoxLayout):
         super().__init__(**kwargs)
         self.task_id = task_id
         self.task_input_field.text = task_text
-
         self.belongs_to = {"tasks", }
-
         self.deadline = ""
-
         self.priority = 3
         self.is_done = False
         self.is_important = False
@@ -288,6 +302,9 @@ class Task(MDBoxLayout):
 
     def set_text(self, text):
         self.task_input_field.text = text
+
+    def set_deadline(self, new_deadline):
+        self.deadline = new_deadline
 
 
 class ToolBar(MDBoxLayout):
