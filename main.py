@@ -66,8 +66,16 @@ class TasksScreen(MDScreen):
     def delete_all_tasks(self):
         self.tasks.clear_widgets()
 
+    def sort_return(self):
+        try:
+            self.delete_all_tasks()
+            self.import_tasks(self.not_sorted)
+        except:
+            pass
+
     def sort_tasks_alphabet(self):
         # SORT ALFABET
+        self.not_sorted = self.get_tasks()
         new_tasks_text = sorted([task.get_text() for task in self.get_tasks()])
         new_tasks = []
         for label in new_tasks_text:
@@ -84,6 +92,7 @@ class TasksScreen(MDScreen):
             self.import_tasks(self.get_tasks())
 
     def sort_tasks_alphabet_reversed(self):
+        self.not_sorted = self.get_tasks()
         # SORT ALFABET
         new_tasks_text = sorted([task.get_text() for task in self.get_tasks()])
         new_tasks = []
@@ -96,6 +105,7 @@ class TasksScreen(MDScreen):
         self.import_tasks(new_tasks)
 
     def sort_task_important_up(self):
+        self.not_sorted = self.get_tasks()
         tasks_important = []
         tasks_NOT_important = []
         for task in self.get_tasks():
@@ -108,6 +118,7 @@ class TasksScreen(MDScreen):
         self.import_tasks(new_task[::-1])
 
     def sort_task_important_down(self):
+        self.not_sorted = self.get_tasks()
         tasks_important = []
         tasks_NOT_important = []
         for task in self.get_tasks():
@@ -238,6 +249,12 @@ class ToolBar(MDBoxLayout):
                 "left_icon": "sort-alphabetical-descending",
                 "viewclass": "RightContentCls",
                 "on_release": self.sort_task_important_down
+            },
+            {
+                "text": "вернуть все",
+                "left_icon": "sort-alphabetical-descending",
+                "viewclass": "RightContentCls",
+                "on_release": self.sort_return
             }
         ]
         self.menu = MDDropdownMenu(
@@ -274,6 +291,9 @@ class ToolBar(MDBoxLayout):
 
     def search_task(self):
         get_screen_manager().current_screen.search_task()
+
+    def sort_return(self):
+        get_screen_manager().current_screen.sort_return()
 
 
 class MenuButton(OneLineIconListItem):
