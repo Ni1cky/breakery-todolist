@@ -66,6 +66,7 @@ class TasksMenuDrawer(MDNavigationDrawer):
 
     def make_important(self):
         self.task.make_important()
+        self.compare_data()
 
     def open(self):
         self.set_state("open")
