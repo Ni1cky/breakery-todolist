@@ -55,7 +55,8 @@ class TasksMenuDrawer(MDNavigationDrawer):
 
     def compare_data(self):
         if self.task.deadline != "":
-            if datetime.datetime.strptime(self.task.deadline, "%Y-%m-%d") < datetime.datetime.now():
+            if datetime.datetime.date(datetime.datetime.now()) > datetime.datetime.strptime(self.task.deadline,
+                                                                                            "%Y-%m-%d").date():
                 self.deadline_label.text_color = "#F2090D"
         if self.task.is_important:
             self.important_button.icon = 'cards-heart'
@@ -153,7 +154,8 @@ class TasksScreen(MDScreen):
                 self.add_task(task)
                 task.menu_btn.text_color = "#FFFFFF"
             if not task.is_done and self.name != "done_tasks" and task.deadline != "":
-                if datetime.datetime.now() > datetime.datetime.strptime(task.deadline, "%Y-%m-%d"):
+                if datetime.datetime.date(datetime.datetime.now()) > datetime.datetime.strptime(task.deadline,
+                                                                                                "%Y-%m-%d").date():
                     task.menu_btn.text_color = "#F2090D"
 
     def search_task(self):
