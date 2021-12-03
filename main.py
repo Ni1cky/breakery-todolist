@@ -333,6 +333,25 @@ class ScrollViewTasksList(ScrollView):
         self.screens_list.add_widget(new_list)
         self.new_list_field.text = ""
 
+    def delete_list(self):
+        victim: TasksScreen = get_screen_manager().current_screen
+        if victim.name in ["tasks", "done_tasks", "important", "my_day"]:
+            return
+        screen_manager = get_screen_manager()
+
+        victim.delete_all_tasks()
+
+        screen_manager.remove_widget(victim)
+        self.screens_list.remove_widget(victim.calling_button)
+        container: MainContainer = get_main_container()
+        default: MenuButton = container.main_menu.upper.start_button
+        container.toolbar.left_toolbar.title = default.text
+
+        get_screen_manager().current = default.screen_name
+        default.mark_active(None)
+
+        print(self.screens_list.children)
+
 
 class LowerMenuLayout(MDBoxLayout):
     task_screens_scroll_view: ScrollViewTasksList = ObjectProperty()
