@@ -4,7 +4,7 @@
     make_imp_btn: make_imp_btn
     canvas:
         Color:
-            rgba: app.color_converter('A200')
+            rgba: [int(app.all_colors[app.app_color]['A200'][:2], 16) / 255, int(app.all_colors[app.app_color]['A200'][2:4], 16) / 255, int(app.all_colors[app.app_color]['A200'][4:], 16) / 255] + [1]
         RoundedRectangle:
             radius: [(10, 10), (10, 10), (10, 10), (10, 10)]
             pos: self.pos
@@ -185,12 +185,12 @@
         left_action_items: [["menu", root.open_menu]]
         theme_text_color: "Custom"
         icon_left_color: 1, 0, 0, 1
-        md_bg_color: app.color_converter('500')
+        md_bg_color: [int(app.all_colors[app.app_color]['500'][:2], 16) / 255, int(app.all_colors[app.app_color]['500'][2:4], 16) / 255, int(app.all_colors[app.app_color]['500'][4:], 16) / 255] + [1]
     AnchorLayout:
         size_hint_x: 0.3
         canvas:
             Color:
-                rgba: app.color_converter('500')
+                rgba: [int(app.all_colors[app.app_color]['500'][:2], 16) / 255, int(app.all_colors[app.app_color]['500'][2:4], 16) / 255, int(app.all_colors[app.app_color]['500'][4:], 16) / 255] + [1]
             Rectangle:
                 pos: self.pos
                 size: self.size
@@ -199,21 +199,20 @@
         MDTextField:
             id: search_text_field
             theme_text_color: 'Custom'
-            color_active: app.color_converter('500')
-            mode: "fill"
-            fill_color_normal: app.color_converter('500')
-            fill_color_focus: app.color_converter('500')
+            color_active: [int(app.all_colors[app.app_color]['500'][:2], 16) / 255, int(app.all_colors[app.app_color]['500'][2:4], 16) / 255, int(app.all_colors[app.app_color]['500'][4:], 16) / 255] + [1]
+            mode: "line"
             text_color_normal: 1, 1, 1, 1
             text_color_focus: 1, 1, 1, 1
             font_size: self.height // 2.9
             line_color_focus: 1, 1, 1, 1
+            line_color_normal: 1, 1, 1, 0
             hint_text: "Найти задачу"
             hint_text_color_normal: 1, 1, 1, 1
             on_text: root.search_task()
     MDToolbar:
         size_hint_x: 0.25
         right_action_items: [["sort", root.open_sort_menu], ["brush", root.open_theme_menu]]
-        md_bg_color: app.color_converter('500')
+        md_bg_color: [int(app.all_colors[app.app_color]['500'][:2], 16) / 255, int(app.all_colors[app.app_color]['500'][2:4], 16) / 255, int(app.all_colors[app.app_color]['500'][4:], 16) / 255] + [1]
 
 
 
