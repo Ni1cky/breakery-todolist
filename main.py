@@ -185,6 +185,8 @@ class TasksScreen(MDScreen):
         self.import_tasks(new_tasks[::-1])
 
     def reload(self):
+        for task in get_tasks_manager().tasks:
+            task.repaint()
         if get_screen_manager().current == self.name:
             self.delete_all_tasks()
             self.import_tasks(self.get_tasks())
@@ -293,11 +295,11 @@ class Task(MDBoxLayout):
     def repaint(self):
         for child in self.canvas.children:
             if isinstance(child, Color):
-                if child.rgba == [0.0, 0.31, 0.88, 0.7]:
+                if self.is_done and child.rgba == [int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][:2], 16) / 255, int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][2:4], 16) / 255, int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][4:], 16) / 255] + [1]:
                     child.rgba = [0.39, 0.39, 0.39, 1]
                     return
-                if child.rgba == [0.39, 0.39, 0.39, 1]:
-                    child.rgba = [0.0, 0.31, 0.88, 0.7]
+                if not self.is_done and child.rgba == [0.39, 0.39, 0.39, 1]:
+                    child.rgba = [int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][:2], 16) / 255, int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][2:4], 16) / 255, int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][4:], 16) / 255] + [1]
                     return
 
     def get_text(self):
@@ -308,7 +310,6 @@ class Task(MDBoxLayout):
 
     def set_deadline(self, new_deadline):
         self.deadline = new_deadline
-
 
 
 class ToolBar(MDBoxLayout):
@@ -378,9 +379,7 @@ class ToolBar(MDBoxLayout):
 
     def change_color(self, color):
         MDApp.get_running_app().app_color = color
-
-
-
+        get_main_container().main_menu.upper.start_button.change_screen()
 
     def open_theme_menu(self, instance):
         self.themes.caller = instance
@@ -542,6 +541,7 @@ class MainContainer(MDBoxLayout):
         for task_id in save.keys():
             task_params = save[task_id]
             task = Task(task_id=int(task_id), task_text=task_params["text"])
+            tasks_man.add_new_task(task)
             if task_params["is_important"]:
                 task.make_important()
             if task_params["is_done"]:
@@ -628,10 +628,31 @@ class TodoApp(MDApp):
         self.main_container.load_tasks()
         self.main_container.load_screens()
         self.main_container.main_menu.upper.start_button.mark_active(None)
+        self.load_theme()
 
     def on_stop(self):
         self.main_container.save_tasks()
         self.main_container.save_screens()
+        self.save_theme()
+
+    def save_theme(self):
+        if not os.path.exists(SAVE_FOLDER):
+            os.mkdir(SAVE_FOLDER)
+            with open(f"{SAVE_FOLDER}/.gitignore", "w") as gitignore:
+                gitignore.writelines(["*", "!.gitignore"])
+        with open(f"{THEME_SAVE_PATH}", "w") as theme:
+            theme.write(self.app_color)
+
+    def load_theme(self):
+        if (
+                not os.path.exists(SAVE_FOLDER) or
+                os.listdir(SAVE_FOLDER) == [".gitignore"] or
+                f"{THEME_SAVE_NAME}.txt" not in os.listdir(SAVE_FOLDER)
+        ):
+            return
+
+        with open(f"{THEME_SAVE_PATH}", "r") as theme:
+            self.app_color = theme.readline()
 
     def get_main_container(self) -> MainContainer:
         return self.main_container
