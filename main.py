@@ -98,12 +98,12 @@ class TasksMenuDrawer(MDNavigationDrawer):
             {
                 "text": "Очень важная",
                 "viewclass": "OneLineListItem",
-                "on_release": lambda: self.set_priority("Очень важная")
+                "on_release": lambda: self.set_priority("Очень высокая")
             },
             {
                 "text": "Важная",
                 "viewclass": "OneLineListItem",
-                "on_release": lambda: self.set_priority("Важная")
+                "on_release": lambda: self.set_priority("Высокая")
             },
             {
                 "text": "Обычная",
@@ -436,63 +436,63 @@ class ToolBar(MDBoxLayout):
 
         menu_items = [
             {
-                "text": "Сортировка по дате",
-                "left_icon": "sort-alphabetical-descending",
+                "text": "01.01.01 - 02.02.02",
+                "left_icon": "sort-calendar-ascending",
                 "viewclass": "RightContentCls",
                 "on_release": self.sort_deadline
             },
             {
-                "text": "Обратная сортировка по дате",
-                "left_icon": "sort-alphabetical-descending",
+                "text": "02.02.02 - 01.01.01",
+                "left_icon": "sort-calendar-descending",
                 "viewclass": "RightContentCls",
                 "on_release": self.sort_deadline_reversed
             },
             {
-                "text": "Сортировка по приоритету",
-                "left_icon": "sort-alphabetical-descending",
+                "text": "1 - 5",
+                "left_icon": "sort-numeric-ascending",
                 "viewclass": "RightContentCls",
                 "on_release": self.sort_priority
             },
             {
-                "text": "Обратная сортировка по приоритету",
-                "left_icon": "sort-alphabetical-descending",
+                "text": "5 - 1",
+                "left_icon": "sort-numeric-descending",
                 "viewclass": "RightContentCls",
                 "on_release": self.sort_priority_reversed
             },
             {
-                "text": "Сортировка по важности",
-                "left_icon": "sort-alphabetical-descending",
+                "text": "Важно - Не важно",
+                "left_icon": "sort-bool-descending",
                 "viewclass": "RightContentCls",
                 "on_release": self.sort_task_important_up
             },
             {
-                "text": "Обратная сортировка по важности",
-                "left_icon": "sort-alphabetical-descending",
+                "text": "Не важно - Важно",
+                "left_icon": "sort-bool-ascending",
                 "viewclass": "RightContentCls",
                 "on_release": self.sort_task_important_down
             },
             {
-                "text": "Сортировка по алфавиту",
+                "text": "А - Я",
                 "left_icon": "sort-alphabetical-ascending",
                 "viewclass": "RightContentCls",
                 "on_release": self.do_sort_tasks_alphabet
             },
             {
-                "text": "Обратная сортировка по алфавиту",
+                "text": "Я - А",
                 "left_icon": "sort-alphabetical-descending",
                 "viewclass": "RightContentCls",
                 "on_release": self.sort_tasks_alphabet_reversed
             },
             {
-                "text": "вернуть все",
-                "left_icon": "sort-alphabetical-descending",
+                "text": "По умолчанию",
+                "left_icon": "window-close",
                 "viewclass": "RightContentCls",
                 "on_release": self.sort_return
             }
         ]
         self.sort_menu = MDDropdownMenu(
             items=menu_items,
-            width_mult=7,
+            width_mult=5,
         )
         self.themes = MDDropdownMenu(
             items=theme_items,
