@@ -21,11 +21,12 @@ from kivymd.app import MDApp
 from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import NoTransition, ScreenManager
 
+from kivy.properties import ObjectProperty, StringProperty, ListProperty, get_color_from_hex
+from kivy.uix.screenmanager import ScreenManager, NoTransition
+
 
 def get_main_container():
     return MDApp.get_running_app().get_main_container()
-from kivy.properties import ObjectProperty, StringProperty, ListProperty, get_color_from_hex
-from kivy.uix.screenmanager import ScreenManager, NoTransition
 
 
 def get_screen_manager() -> ScreenManager:
