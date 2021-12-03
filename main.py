@@ -338,6 +338,11 @@ class ToolBar(MDBoxLayout):
                 "text": "Фиолетовая",
                 "viewclass": "OneLineListItem",
                 "on_press": lambda: self.change_color("Purple")
+            },
+            {
+                "text": "Синяя",
+                "viewclass": "OneLineListItem",
+                "on_press": lambda: self.change_color("Blue")
             }
         ]
 
