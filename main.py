@@ -19,7 +19,7 @@ from kivymd.uix.toolbar import MDToolbar
 import tasks_manager
 from constants import *
 from kivymd.app import MDApp
-from kivy.properties import ObjectProperty, get_color_from_hex
+from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import ScreenManager, NoTransition
 
 
