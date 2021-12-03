@@ -229,6 +229,62 @@ class TasksScreen(MDScreen):
         self.delete_all_tasks()
         self.import_tasks((task_to_scr + task_to_scr_last)[::-1])
 
+    def sort_deadline_reversed(self):
+        if self.not_sorted == []:
+            self.not_sorted = self.get_tasks()
+        dates = [task.get_deadline() for task in self.get_tasks()]
+        task_dates = [date for date in dates if date != '']
+        task_dates.sort()
+        task_to_scr_last = []
+        task_to_scr = []
+        for date in task_dates:
+            for task in self.get_tasks():
+                if date == task.get_deadline() and task not in task_to_scr:
+                    task_to_scr.append(task)
+                elif task.get_deadline() == '' and task not in task_to_scr_last:
+                    task_to_scr_last.append(task)
+        self.delete_all_tasks()
+        self.import_tasks(task_to_scr + task_to_scr_last)
+
+    def sort_priority(self):
+        if self.not_sorted == []:
+            self.not_sorted = self.get_tasks()
+        pr_1, pr_2, pr_3, pr_4, pr_5 = [], [], [], [], []
+        for task in self.get_tasks():
+            if task.priority == 1:
+                pr_1.append(task)
+            if task.priority == 2:
+                pr_2.append(task)
+            if task.priority == 3:
+                pr_3.append(task)
+            if task.priority == 4:
+                pr_4.append(task)
+            if task.priority == 5:
+                pr_5.append(task)
+        new_task = pr_1 + pr_2 + pr_3 + pr_4 + pr_4
+        self.delete_all_tasks()
+        self.import_tasks(new_task[::-1])
+
+    def sort_priority_reversed(self):
+        if self.not_sorted == []:
+            self.not_sorted = self.get_tasks()
+        pr_1, pr_2, pr_3, pr_4, pr_5 = [], [], [], [], []
+        for task in self.get_tasks():
+            if task.priority == 1:
+                pr_1.append(task)
+            if task.priority == 2:
+                pr_2.append(task)
+            if task.priority == 3:
+                pr_3.append(task)
+            if task.priority == 4:
+                pr_4.append(task)
+            if task.priority == 5:
+                pr_5.append(task)
+        new_task = pr_1 + pr_2 + pr_3 + pr_4 + pr_4
+        self.delete_all_tasks()
+        self.import_tasks(new_task)
+
+
     def sort_task_important_up(self):
         if self.not_sorted == []:
             self.not_sorted = self.get_tasks()
@@ -371,16 +427,28 @@ class ToolBar(MDBoxLayout):
 
         menu_items = [
             {
-                "text": "Сортировка по алфавиту",
-                "left_icon": "sort-alphabetical-ascending",
-                "viewclass": "RightContentCls",
-                "on_release": self.do_sort_tasks_alphabet
-            },
-            {
-                "text": "Обратная сортировка по алфавиту",
+                "text": "Сортировка по дате",
                 "left_icon": "sort-alphabetical-descending",
                 "viewclass": "RightContentCls",
-                "on_release": self.sort_tasks_alphabet_reversed
+                "on_release": self.sort_deadline
+            },
+            {
+                "text": "Обратная сортировка по дате",
+                "left_icon": "sort-alphabetical-descending",
+                "viewclass": "RightContentCls",
+                "on_release": self.sort_deadline_reversed
+            },
+            {
+                "text": "Сортировка по приоритету",
+                "left_icon": "sort-alphabetical-descending",
+                "viewclass": "RightContentCls",
+                "on_release": self.sort_priority
+            },
+            {
+                "text": "Обратная сортировка по приоритету",
+                "left_icon": "sort-alphabetical-descending",
+                "viewclass": "RightContentCls",
+                "on_release": self.sort_priority_reversed
             },
             {
                 "text": "Сортировка по важности",
@@ -395,10 +463,16 @@ class ToolBar(MDBoxLayout):
                 "on_release": self.sort_task_important_down
             },
             {
-                "text": "дедлайн",
+                "text": "Сортировка по алфавиту",
+                "left_icon": "sort-alphabetical-ascending",
+                "viewclass": "RightContentCls",
+                "on_release": self.do_sort_tasks_alphabet
+            },
+            {
+                "text": "Обратная сортировка по алфавиту",
                 "left_icon": "sort-alphabetical-descending",
                 "viewclass": "RightContentCls",
-                "on_release": self.sort_deadline
+                "on_release": self.sort_tasks_alphabet_reversed
             },
             {
                 "text": "вернуть все",
@@ -447,6 +521,16 @@ class ToolBar(MDBoxLayout):
 
     def sort_deadline(self):
         get_screen_manager().current_screen.sort_deadline()
+
+    def sort_deadline_reversed(self):
+        get_screen_manager().current_screen.sort_deadline_reversed()
+
+    def sort_priority(self):
+        get_screen_manager().current_screen.sort_priority()
+
+    def sort_priority_reversed(self):
+        get_screen_manager().current_screen.sort_priority_reversed()
+
 
 class MenuButton(OneLineIconListItem):
     '''
