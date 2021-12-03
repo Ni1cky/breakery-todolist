@@ -318,6 +318,8 @@ class ScrollViewTasksList(ScrollView):
     new_list_field: MDTextField = ObjectProperty()
 
     def add_new_list(self):
+        if not self.new_list_field.text:
+            return
         list_name = self.new_list_field.text
         screen_name = list_name
         screen_manager = get_screen_manager()
@@ -334,12 +336,10 @@ class ScrollViewTasksList(ScrollView):
         self.new_list_field.text = ""
 
     def delete_list(self):
-        victim: TasksScreen = get_screen_manager().current_screen
+        victim = get_current_screen()
         if victim.name in ["tasks", "done_tasks", "important", "my_day"]:
             return
         screen_manager = get_screen_manager()
-
-        victim.delete_all_tasks()
 
         screen_manager.remove_widget(victim)
         self.screens_list.remove_widget(victim.calling_button)
@@ -350,7 +350,7 @@ class ScrollViewTasksList(ScrollView):
         get_screen_manager().current = default.screen_name
         default.mark_active(None)
 
-        print(self.screens_list.children)
+        get_tasks_manager().delete_screens_tasks(victim.name)
 
 
 class LowerMenuLayout(MDBoxLayout):
