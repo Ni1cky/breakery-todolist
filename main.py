@@ -65,10 +65,10 @@ class TasksMenuDrawer(MDNavigationDrawer):
                                                                                             "%Y-%m-%d").date():
                 self.deadline_label.text_color = "#F2090D"
         if self.task.is_important:
-            self.important_button.icon = 'cards-heart'
-            self.important_button.text_color = "#FF0000"
+            self.important_button.icon = 'star'
+            self.important_button.text_color = "#FFFF00"
         else:
-            self.important_button.icon = 'cards-heart-outline'
+            self.important_button.icon = 'star-outline'
             self.important_button.text_color = "#000000"
 
     def make_important(self):
@@ -266,12 +266,12 @@ class Task(MDBoxLayout):
     def make_important(self):
         tasks_man: tasks_manager.TasksManager = get_tasks_manager()
         if not self.is_important:
-            self.make_imp_btn.icon = 'cards-heart'
-            self.make_imp_btn.text_color = "#FF0000"
+            self.make_imp_btn.icon = 'star'
+            self.make_imp_btn.text_color = "#FFFF00"
             self.is_important = True
             tasks_man.add_task_to_screen(self.task_id, "important")
         else:
-            self.make_imp_btn.icon = 'cards-heart-outline'
+            self.make_imp_btn.icon = 'star-outline'
             self.make_imp_btn.text_color = "#FFFFFF"
             self.is_important = False
             self.belongs_to.remove("important")
@@ -598,7 +598,7 @@ class TodoApp(MDApp):
         super().__init__(**kwargs)
         self.tasks_manager = tasks_manager.TasksManager()
         self.main_container = None
-        self.app_color = "Green"
+        self.app_color = "Blue"
         self.all_colors = colors
 
     def color_converter(self, k):

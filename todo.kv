@@ -41,7 +41,7 @@
         anchor_y: "center"
         size_hint: 0.1, 1
         MDIconButton:
-            icon: 'cards-heart-outline'
+            icon: 'star-outline'
 #            icon: 'cards-heart'
 #            text_color: "#FF0000"
             theme_text_color: 'Custom'
@@ -125,7 +125,7 @@
                 size_hint_x: 0.2
                 MDIconButton:
                     pos_hint: {"center_x": .5, "center_y": .5}
-                    icon: 'cards-heart-outline'
+                    icon: 'star-outline'
                     id: important_button
                     on_press: root.make_important()
                     theme_text_color: 'Custom'
@@ -216,7 +216,7 @@
     MenuButton:
         id: important_button
         screen_name: "important"
-        icn: "cards-heart"
+        icn: "star"
         text: "Важно"
     MenuButton:
         id: my_day_button
@@ -321,6 +321,7 @@
             line_color_normal: 1, 1, 1, 0
             hint_text: "Найти задачу"
             hint_text_color_normal: 1, 1, 1, 1
+            hint_text_color_focus: [int(app.all_colors[app.app_color]['500'][:2], 16) / 255, int(app.all_colors[app.app_color]['500'][2:4], 16) / 255, int(app.all_colors[app.app_color]['500'][4:], 16) / 255] + [1]
             on_text: root.search_task()
     MDToolbar:
         size_hint_x: 0.25
@@ -358,7 +359,6 @@
         pos_hint: {'y': 0.02}
         MDIconButton:
             icon: "plus"
-#            md_bg_color: app.color_converter('300')
             md_bg_color: app.all_colors[app.app_color]['300']
             theme_text_color: 'Custom'
             text_color: 1, 1, 1, 1
@@ -367,3 +367,4 @@
     MDNavigationLayout:
         TasksMenuDrawer:
             id: info_drawer
+            md_bg_color: [int(app.all_colors[app.app_color]['50'][:2], 16) / 255, int(app.all_colors[app.app_color]['50'][2:4], 16) / 255, int(app.all_colors[app.app_color]['50'][4:], 16) / 255] + [0.8]
