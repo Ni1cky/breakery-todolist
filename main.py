@@ -135,6 +135,10 @@ class TasksScreen(MDScreen):
     calling_button: OneLineIconListItem = ObjectProperty()
     info_drawer: TasksMenuDrawer = ObjectProperty()
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.not_sorted = []
+
     def get_tasktext_for_searching(self):
         return MDApp.get_running_app().get_main_container().toolbar.search_text_field.text
 
@@ -172,15 +176,14 @@ class TasksScreen(MDScreen):
         self.tasks.clear_widgets()
 
     def sort_return(self):
-        try:
+        if self.not_sorted != []:
             self.delete_all_tasks()
             self.import_tasks(self.not_sorted)
-        except:
-            pass
 
     def sort_tasks_alphabet(self):
         # SORT ALFABET
-        self.not_sorted = self.get_tasks()
+        if self.not_sorted == []:
+            self.not_sorted = self.get_tasks()
         new_tasks_text = sorted([task.get_text() for task in self.get_tasks()])
         new_tasks = []
         for label in new_tasks_text:
@@ -197,8 +200,8 @@ class TasksScreen(MDScreen):
             self.import_tasks(self.get_tasks())
 
     def sort_tasks_alphabet_reversed(self):
-        self.not_sorted = self.get_tasks()
-        # SORT ALFABET
+        if self.not_sorted == []:
+            self.not_sorted = self.get_tasks()        # SORT ALFABET
         new_tasks_text = sorted([task.get_text() for task in self.get_tasks()])
         new_tasks = []
         for label in new_tasks_text:
@@ -209,8 +212,26 @@ class TasksScreen(MDScreen):
         self.delete_all_tasks()
         self.import_tasks(new_tasks)
 
+    def sort_deadline(self):
+        if self.not_sorted == []:
+            self.not_sorted = self.get_tasks()
+        dates = [task.get_deadline() for task in self.get_tasks()]
+        task_dates = [date for date in dates if date != '']
+        task_dates.sort()
+        task_to_scr_last = []
+        task_to_scr = []
+        for date in task_dates:
+            for task in self.get_tasks():
+                if date == task.get_deadline() and task not in task_to_scr:
+                    task_to_scr.append(task)
+                elif task.get_deadline() == '' and task not in task_to_scr_last:
+                    task_to_scr_last.append(task)
+        self.delete_all_tasks()
+        self.import_tasks((task_to_scr + task_to_scr_last)[::-1])
+
     def sort_task_important_up(self):
-        self.not_sorted = self.get_tasks()
+        if self.not_sorted == []:
+            self.not_sorted = self.get_tasks()
         tasks_important = []
         tasks_NOT_important = []
         for task in self.get_tasks():
@@ -223,7 +244,8 @@ class TasksScreen(MDScreen):
         self.import_tasks(new_task[::-1])
 
     def sort_task_important_down(self):
-        self.not_sorted = self.get_tasks()
+        if self.not_sorted == []:
+            self.not_sorted = self.get_tasks()
         tasks_important = []
         tasks_NOT_important = []
         for task in self.get_tasks():
@@ -319,6 +341,9 @@ class Task(MDBoxLayout):
     def set_deadline(self, new_deadline):
         self.deadline = new_deadline
 
+    def get_deadline(self):
+        return self.deadline
+
 
 class ToolBar(MDBoxLayout):
     search_text_field: MDTextField = ObjectProperty()
@@ -370,6 +395,12 @@ class ToolBar(MDBoxLayout):
                 "on_release": self.sort_task_important_down
             },
             {
+                "text": "дедлайн",
+                "left_icon": "sort-alphabetical-descending",
+                "viewclass": "RightContentCls",
+                "on_release": self.sort_deadline
+            },
+            {
                 "text": "вернуть все",
                 "left_icon": "sort-alphabetical-descending",
                 "viewclass": "RightContentCls",
@@ -414,6 +445,8 @@ class ToolBar(MDBoxLayout):
     def sort_return(self):
         get_screen_manager().current_screen.sort_return()
 
+    def sort_deadline(self):
+        get_screen_manager().current_screen.sort_deadline()
 
 class MenuButton(OneLineIconListItem):
     '''
