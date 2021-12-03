@@ -1,8 +1,6 @@
 import datetime
 import json
 import os
-
-from kivy.uix.boxlayout import BoxLayout
 from kivy.graphics import Color
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
@@ -21,10 +19,7 @@ from kivymd.uix.toolbar import MDToolbar
 import tasks_manager
 from constants import *
 from kivymd.app import MDApp
-from kivy.properties import ObjectProperty
-from kivy.uix.screenmanager import NoTransition, ScreenManager
-
-from kivy.properties import ObjectProperty, StringProperty, ListProperty, get_color_from_hex
+from kivy.properties import ObjectProperty, get_color_from_hex
 from kivy.uix.screenmanager import ScreenManager, NoTransition
 
 
@@ -624,9 +619,6 @@ class TodoApp(MDApp):
         self.main_container = None
         self.app_color = "Blue"
         self.all_colors = colors
-
-    def color_converter(self, k):
-        return get_color_from_hex(colors[self.app_color][k])
 
     def build(self):
         self.main_container = MainContainer()
