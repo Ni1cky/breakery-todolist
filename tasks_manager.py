@@ -54,3 +54,7 @@ class TasksManager:
 
     def get_task(self, task_id):
         return self.tasks[task_id]
+
+    def delete_screens_tasks(self, screen_name):
+        self.tasks = [task for task in self.tasks if screen_name not in task.belongs_to]
+        self.reload_all_screens()

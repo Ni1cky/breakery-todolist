@@ -4,6 +4,7 @@ import os
 from kivy.graphics import Color
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
+from kivymd.color_definitions import colors
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDIconButton
 from kivymd.uix.label import MDLabel
@@ -19,7 +20,7 @@ import tasks_manager
 from constants import *
 from kivymd.app import MDApp
 from kivy.properties import ObjectProperty
-from kivy.uix.screenmanager import NoTransition, ScreenManager
+from kivy.uix.screenmanager import ScreenManager, NoTransition
 
 
 def get_main_container():
@@ -59,10 +60,10 @@ class TasksMenuDrawer(MDNavigationDrawer):
                                                                                             "%Y-%m-%d").date():
                 self.deadline_label.text_color = "#F2090D"
         if self.task.is_important:
-            self.important_button.icon = 'cards-heart'
-            self.important_button.text_color = "#FF0000"
+            self.important_button.icon = 'star'
+            self.important_button.text_color = "#FFFF00"
         else:
-            self.important_button.icon = 'cards-heart-outline'
+            self.important_button.icon = 'star-outline'
             self.important_button.text_color = "#000000"
 
     def make_important(self):
@@ -195,6 +196,8 @@ class TasksScreen(MDScreen):
         self.import_tasks(new_tasks[::-1])
 
     def reload(self):
+        for task in get_tasks_manager().tasks:
+            task.repaint()
         if get_screen_manager().current == self.name:
             self.delete_all_tasks()
             self.import_tasks(self.get_tasks())
@@ -349,12 +352,12 @@ class Task(MDBoxLayout):
     def make_important(self):
         tasks_man: tasks_manager.TasksManager = get_tasks_manager()
         if not self.is_important:
-            self.make_imp_btn.icon = 'cards-heart'
-            self.make_imp_btn.text_color = "#FF0000"
+            self.make_imp_btn.icon = 'star'
+            self.make_imp_btn.text_color = "#FFFF00"
             self.is_important = True
             tasks_man.add_task_to_screen(self.task_id, "important")
         else:
-            self.make_imp_btn.icon = 'cards-heart-outline'
+            self.make_imp_btn.icon = 'star-outline'
             self.make_imp_btn.text_color = "#FFFFFF"
             self.is_important = False
             self.belongs_to.remove("important")
@@ -381,11 +384,11 @@ class Task(MDBoxLayout):
     def repaint(self):
         for child in self.canvas.children:
             if isinstance(child, Color):
-                if child.rgba == [0.0, 0.31, 0.88, 0.7]:
+                if self.is_done and child.rgba == [int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][:2], 16) / 255, int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][2:4], 16) / 255, int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][4:], 16) / 255] + [1]:
                     child.rgba = [0.39, 0.39, 0.39, 1]
                     return
-                if child.rgba == [0.39, 0.39, 0.39, 1]:
-                    child.rgba = [0.0, 0.31, 0.88, 0.7]
+                if not self.is_done and child.rgba == [0.39, 0.39, 0.39, 1]:
+                    child.rgba = [int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][:2], 16) / 255, int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][2:4], 16) / 255, int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][4:], 16) / 255] + [1]
                     return
 
     def get_text(self):
@@ -407,21 +410,27 @@ class ToolBar(MDBoxLayout):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
         theme_items = [
             {
-                "text": "светлая",
+                "text": "Розовая",
                 "viewclass": "OneLineListItem",
-                # "on_release": self.do_sort_tasks_alphabet
+                "on_press": lambda: self.change_color("Pink")
             },
             {
-                "text": "темная",
+                "text": "Оранжевая",
                 "viewclass": "OneLineListItem",
-                # "on_release": self.sort_tasks_alphabet_reversed
+                "on_press": lambda: self.change_color("Orange")
             },
             {
-                "text": "бурая",
+                "text": "Фиолетовая",
                 "viewclass": "OneLineListItem",
-                # "on_release": self.sort_task_important_up
+                "on_press": lambda: self.change_color("Purple")
+            },
+            {
+                "text": "Синяя",
+                "viewclass": "OneLineListItem",
+                "on_press": lambda: self.change_color("Blue")
             }
         ]
 
@@ -489,6 +498,10 @@ class ToolBar(MDBoxLayout):
             items=theme_items,
             width_mult=3,
         )
+
+    def change_color(self, color):
+        MDApp.get_running_app().app_color = color
+        get_main_container().main_menu.upper.start_button.change_screen()
 
     def open_theme_menu(self, instance):
         self.themes.caller = instance
@@ -574,6 +587,8 @@ class ScrollViewTasksList(ScrollView):
     new_list_field: MDTextField = ObjectProperty()
 
     def add_new_list(self):
+        if not self.new_list_field.text:
+            return
         list_name = self.new_list_field.text
         screen_name = list_name
         screen_manager = get_screen_manager()
@@ -587,7 +602,23 @@ class ScrollViewTasksList(ScrollView):
         new_list = MenuButton(screen_name=screen_name)
         new_list.text = list_name
         self.screens_list.add_widget(new_list)
-        self.new_list_field.text = ""
+
+    def delete_list(self):
+        victim = get_current_screen()
+        if victim.name in ["tasks", "done_tasks", "important", "my_day"]:
+            return
+        screen_manager = get_screen_manager()
+
+        screen_manager.remove_widget(victim)
+        self.screens_list.remove_widget(victim.calling_button)
+        container: MainContainer = get_main_container()
+        default: MenuButton = container.main_menu.upper.start_button
+        container.toolbar.left_toolbar.title = default.text
+
+        get_screen_manager().current = default.screen_name
+        default.mark_active(None)
+
+        get_tasks_manager().delete_screens_tasks(victim.name)
 
 
 class LowerMenuLayout(MDBoxLayout):
@@ -717,9 +748,14 @@ class MainContainer(MDBoxLayout):
 
 
 class TodoApp(MDApp):
+    app_color = ObjectProperty()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.tasks_manager = tasks_manager.TasksManager()
+        self.main_container = None
+        self.app_color = "Blue"
+        self.all_colors = colors
 
     def build(self):
         self.main_container = MainContainer()
@@ -729,10 +765,31 @@ class TodoApp(MDApp):
         self.main_container.load_tasks()
         self.main_container.load_screens()
         self.main_container.main_menu.upper.start_button.mark_active(None)
+        self.load_theme()
 
     def on_stop(self):
         self.main_container.save_tasks()
         self.main_container.save_screens()
+        self.save_theme()
+
+    def save_theme(self):
+        if not os.path.exists(SAVE_FOLDER):
+            os.mkdir(SAVE_FOLDER)
+            with open(f"{SAVE_FOLDER}/.gitignore", "w") as gitignore:
+                gitignore.writelines(["*", "!.gitignore"])
+        with open(f"{THEME_SAVE_PATH}", "w") as theme:
+            theme.write(self.app_color)
+
+    def load_theme(self):
+        if (
+                not os.path.exists(SAVE_FOLDER) or
+                os.listdir(SAVE_FOLDER) == [".gitignore"] or
+                f"{THEME_SAVE_NAME}.txt" not in os.listdir(SAVE_FOLDER)
+        ):
+            return
+
+        with open(f"{THEME_SAVE_PATH}", "r") as theme:
+            self.app_color = theme.readline()
 
     def get_main_container(self) -> MainContainer:
         return self.main_container
