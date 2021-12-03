@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 
@@ -8,9 +9,11 @@ from kivy.uix.scrollview import ScrollView
 from kivymd.color_definitions import colors
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDIconButton
+from kivymd.uix.label import MDLabel
 from kivymd.uix.list import OneLineIconListItem, MDList
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.navigationdrawer import MDNavigationDrawer
+from kivymd.uix.pickers import MDDatePicker
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.textfield import MDTextField
@@ -37,9 +40,106 @@ def get_tasks_manager():
     return MDApp.get_running_app().get_tasks_manager()
 
 
+class TasksMenuDrawer(MDNavigationDrawer):
+    task_text_field: MDTextField = ObjectProperty()
+    done_checkbox: MDCheckbox = ObjectProperty()
+    important_button: MDIconButton = ObjectProperty()
+    deadline_label: MDLabel = ObjectProperty()
+    priority_label: MDLabel = ObjectProperty()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.task = None
+
+    def load_task(self, task_id):
+        self.task = get_tasks_manager().get_task(task_id)
+        self.task_text_field.text = self.task.get_text()
+        self.done_checkbox.active = self.task.is_done
+        self.deadline_label.text = "Дедлайн " + self.task.deadline
+        self.priority_label.text = "Приоритетность " + NUMBER_TO_PRIORITY[self.task.priority]
+        self.compare_data()
+
+    def compare_data(self):
+        if self.task.deadline != "":
+            if datetime.datetime.date(datetime.datetime.now()) > datetime.datetime.strptime(self.task.deadline,
+                                                                                            "%Y-%m-%d").date():
+                self.deadline_label.text_color = "#F2090D"
+        if self.task.is_important:
+            self.important_button.icon = 'cards-heart'
+            self.important_button.text_color = "#FF0000"
+        else:
+            self.important_button.icon = 'cards-heart-outline'
+            self.important_button.text_color = "#000000"
+
+    def make_important(self):
+        self.task.make_important()
+        self.compare_data()
+
+    def open(self):
+        self.set_state("open")
+
+    def mark_done(self):
+        self.task.mark_done()
+
+    def change_task_text(self):
+        self.task.set_text(self.task_text_field.text)
+
+    def on_save(self, instance, value, date_range):
+        self.deadline_label.text = "Дедлайн " + str(value)
+        self.task.deadline = str(value)
+
+    def open_calendar(self):
+        picker = MDDatePicker(min_date=datetime.date.today(),
+                              max_date=datetime.date(datetime.date.today().year + 4, 1, 1))
+        picker.bind(on_save=self.on_save)
+        picker.open()
+
+    def set_priority(self, priority):
+        self.task.set_priority(priority)
+        self.priority_label.text = "Приоритетность " + priority
+
+    def open_priority_menu(self, instance):
+        menu_items = [
+            {
+                "text": "Очень важная",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda: self.set_priority("Очень важная")
+            },
+            {
+                "text": "Важная",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda: self.set_priority("Важная")
+            },
+            {
+                "text": "Обычная",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda: self.set_priority("Обычная")
+            },
+            {
+                "text": "Низкая",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda: self.set_priority("Низкая")
+            },
+            {
+                "text": "Очень низкая",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda: self.set_priority("Очень низкая")
+            }
+        ]
+
+        menu = MDDropdownMenu(
+            items=menu_items,
+            width_mult=3,
+        )
+
+        menu.caller = instance
+        menu.open()
+
+
 class TasksScreen(MDScreen):
     tasks: GridLayout = ObjectProperty()
     calling_button: OneLineIconListItem = ObjectProperty()
+    info_drawer: TasksMenuDrawer = ObjectProperty()
 
     def get_tasktext_for_searching(self):
         return MDApp.get_running_app().get_main_container().toolbar.search_text_field.text
@@ -58,6 +158,11 @@ class TasksScreen(MDScreen):
         for task in tasks:
             if not task.is_done or self.name == "done_tasks":
                 self.add_task(task)
+                task.menu_btn.text_color = "#FFFFFF"
+            if not task.is_done and self.name != "done_tasks" and task.deadline != "":
+                if datetime.datetime.date(datetime.datetime.now()) > datetime.datetime.strptime(task.deadline,
+                                                                                                "%Y-%m-%d").date():
+                    task.menu_btn.text_color = "#F2090D"
 
     def search_task(self):
         self.delete_all_tasks()
@@ -142,9 +247,9 @@ class Task(MDBoxLayout):
         super().__init__(**kwargs)
         self.task_id = task_id
         self.task_input_field.text = task_text
-
         self.belongs_to = {"tasks", }
-
+        self.deadline = ""
+        self.priority = 3
         self.is_done = False
         self.is_important = False
 
@@ -182,6 +287,14 @@ class Task(MDBoxLayout):
         get_screen_manager().current_screen.reload()
         self.task_checkbox.active = self.is_done
 
+    def set_priority(self, priority):
+        self.priority = PRIORITY_TO_NUMBER[priority]
+
+    def open_additional_info(self):
+        info: TasksMenuDrawer = get_current_screen().info_drawer
+        info.load_task(self.task_id)
+        info.open()
+
     def repaint(self):
         for child in self.canvas.children:
             if isinstance(child, Color):
@@ -194,6 +307,12 @@ class Task(MDBoxLayout):
 
     def get_text(self):
         return self.task_input_field.text
+
+    def set_text(self, text):
+        self.task_input_field.text = text
+
+    def set_deadline(self, new_deadline):
+        self.deadline = new_deadline
 
 
 
@@ -248,7 +367,7 @@ class ToolBar(MDBoxLayout):
                 "on_release": self.sort_task_important_down
             }
         ]
-        self.menu = MDDropdownMenu(
+        self.sort_menu = MDDropdownMenu(
             items=menu_items,
             width_mult=7,
         )
@@ -271,8 +390,8 @@ class ToolBar(MDBoxLayout):
         MDApp.get_running_app().get_main_container().open_menu()
 
     def open_sort_menu(self, instance):
-        self.menu.caller = instance
-        self.menu.open()
+        self.sort_menu.caller = instance
+        self.sort_menu.open()
 
     def sort_task_important_up(self):
         get_screen_manager().current_screen.sort_task_important_up()
@@ -378,11 +497,6 @@ class MainContainer(MDBoxLayout):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.SAVE_FOLDER = SAVE_FOLDER
-        self.TASKS_SAVE_NAME = TASKS_SAVE_NAME
-        self.TASKS_SAVE_PATH = TASKS_SAVE_PATH
-        self.SCREENS_SAVE_PATH = SCREENS_SAVE_PATH
-        self.SCREENS_SAVE_NAME = SCREENS_SAVE_NAME
 
         self.screen_manager.transition = NoTransition()
 
@@ -394,18 +508,18 @@ class MainContainer(MDBoxLayout):
 
     def load_tasks(self):
         if (
-                not os.path.exists(self.SAVE_FOLDER) or
-                os.listdir(self.SAVE_FOLDER) == [".gitignore"] or
-                f"{self.TASKS_SAVE_NAME}.json" not in os.listdir(self.SAVE_FOLDER)
+                not os.path.exists(SAVE_FOLDER) or
+                os.listdir(SAVE_FOLDER) == [".gitignore"] or
+                f"{TASKS_SAVE_NAME}.json" not in os.listdir(SAVE_FOLDER)
         ):
             return
 
-        with open(self.TASKS_SAVE_PATH, "r") as f:
+        with open(TASKS_SAVE_PATH, "r") as f:
             save = json.load(f)
 
         tasks_man = get_tasks_manager()
 
-        save: dict = save[self.TASKS_SAVE_NAME]
+        save: dict = save[TASKS_SAVE_NAME]
         for task_id in save.keys():
             task_params = save[task_id]
             task = Task(task_id=int(task_id), task_text=task_params["text"])
@@ -414,53 +528,57 @@ class MainContainer(MDBoxLayout):
             if task_params["is_done"]:
                 task.mark_done()
             task.update_parents(task_params["belongs_to"])
+            task.priority = task_params["priority"]
+            task.deadline = task_params["deadline"]
         tasks_man.reload_current_screen()
 
     def save_tasks(self):
-        if not os.path.exists(self.SAVE_FOLDER):
-            os.mkdir(self.SAVE_FOLDER)
-            with open(f"{self.SAVE_FOLDER}/.gitignore", "w") as gitignore:
+        if not os.path.exists(SAVE_FOLDER):
+            os.mkdir(SAVE_FOLDER)
+            with open(f"{SAVE_FOLDER}/.gitignore", "w") as gitignore:
                 gitignore.writelines(["*", "!.gitignore"])
 
-        data = {self.TASKS_SAVE_NAME: {}}
-        cur_save = data[self.TASKS_SAVE_NAME]
+        data = {TASKS_SAVE_NAME: {}}
+        cur_save = data[TASKS_SAVE_NAME]
         for task in get_tasks_manager().tasks:
             cur_task = cur_save[task.task_id] = {}
             cur_task["text"] = task.get_text()
             cur_task["is_important"] = task.is_important
             cur_task["is_done"] = task.is_done
             cur_task["belongs_to"] = list(task.belongs_to)
+            cur_task["deadline"] = task.deadline
+            cur_task["priority"] = task.priority
 
-        with open(self.TASKS_SAVE_PATH, 'w') as f:
+        with open(TASKS_SAVE_PATH, 'w') as f:
             json.dump(data, f)
 
     def save_screens(self):
-        if not os.path.exists(self.SAVE_FOLDER):
-            os.mkdir(self.SAVE_FOLDER)
-            with open(f"{self.SAVE_FOLDER}/.gitignore", "w") as gitignore:
+        if not os.path.exists(SAVE_FOLDER):
+            os.mkdir(SAVE_FOLDER)
+            with open(f"{SAVE_FOLDER}/.gitignore", "w") as gitignore:
                 gitignore.writelines(["*", "!.gitignore"])
 
-        data = {self.SCREENS_SAVE_NAME: {}}
-        cur_save = data[self.SCREENS_SAVE_NAME]
+        data = {SCREENS_SAVE_NAME: {}}
+        cur_save = data[SCREENS_SAVE_NAME]
         for menu_button in self.main_menu.lower.task_screens_scroll_view.screens_list.children:
             menu_button: MenuButton
             cur_screen = cur_save[menu_button.text] = {}
             cur_screen["screen_name"] = menu_button.screen_name
 
-        with open(self.SCREENS_SAVE_PATH, 'w') as f:
+        with open(SCREENS_SAVE_PATH, 'w') as f:
             json.dump(data, f)
 
     def load_screens(self):
         if (
-                not os.path.exists(self.SAVE_FOLDER) or
-                os.listdir(self.SAVE_FOLDER) == [".gitignore"] or
-                f"{self.SCREENS_SAVE_NAME}.json" not in os.listdir(self.SAVE_FOLDER)
+                not os.path.exists(SAVE_FOLDER) or
+                os.listdir(SAVE_FOLDER) == [".gitignore"] or
+                f"{SCREENS_SAVE_NAME}.json" not in os.listdir(SAVE_FOLDER)
         ):
             return
 
-        with open(self.SCREENS_SAVE_PATH, "r") as f:
+        with open(SCREENS_SAVE_PATH, "r") as f:
             save = json.load(f)
-        save: dict = save[self.SCREENS_SAVE_NAME]
+        save: dict = save[SCREENS_SAVE_NAME]
 
         tasks_man = get_tasks_manager()
 

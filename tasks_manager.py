@@ -1,3 +1,5 @@
+import datetime
+
 from main import Task, get_screen_manager, get_current_screen
 
 
@@ -18,6 +20,8 @@ class TasksManager:
         if get_current_screen().name == "important":
             task.make_important()
             return
+        if get_current_screen().name == "my_day":
+            task.deadline = datetime.date.today().strftime("%Y-%m-%d")
         self.add_task_to_screen(-1, get_screen_manager().current)
 
     def add_task_to_screen(self, task_id, screen_name):
