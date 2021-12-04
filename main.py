@@ -94,7 +94,7 @@ class TasksMenuDrawer(MDNavigationDrawer):
         self.priority_label.text = "Приоритетность " + priority
 
     def open_priority_menu(self, instance):
-        menu_items = [
+        priority_items = [
             {
                 "text": "Очень высокая",
                 "viewclass": "OneLineListItem",
@@ -122,23 +122,19 @@ class TasksMenuDrawer(MDNavigationDrawer):
             }
         ]
 
-        menu = MDDropdownMenu(
-            items=menu_items,
+        priority_menu = MDDropdownMenu(
+            items=priority_items,
             width_mult=3,
         )
 
-        menu.caller = instance
-        menu.open()
+        priority_menu.caller = instance
+        priority_menu.open()
 
 
 class TasksScreen(MDScreen):
     tasks: GridLayout = ObjectProperty()
     calling_button: OneLineIconListItem = ObjectProperty()
     info_drawer: TasksMenuDrawer = ObjectProperty()
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.not_sorted = []
 
     def get_tasktext_for_searching(self):
         return MDApp.get_running_app().get_main_container().toolbar.search_text_field.text
@@ -324,33 +320,46 @@ class ToolBar(MDBoxLayout):
     search_text_field: MDTextField = ObjectProperty()
     left_toolbar: MDToolbar = ObjectProperty()
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def change_color(self, color):
+        MDApp.get_running_app().app_color = color
+        get_main_container().main_menu.upper.start_button.change_screen()
 
+    def open_theme_menu(self, instance):
         theme_items = [
             {
                 "text": "Розовая",
                 "viewclass": "OneLineListItem",
-                "on_press": lambda: self.change_color("Pink")
+                "on_release": lambda: self.change_color("Pink")
             },
             {
                 "text": "Оранжевая",
                 "viewclass": "OneLineListItem",
-                "on_press": lambda: self.change_color("Orange")
+                "on_release": lambda: self.change_color("Orange")
             },
             {
                 "text": "Фиолетовая",
                 "viewclass": "OneLineListItem",
-                "on_press": lambda: self.change_color("Purple")
+                "on_release": lambda: self.change_color("Purple")
             },
             {
                 "text": "Синяя",
                 "viewclass": "OneLineListItem",
-                "on_press": lambda: self.change_color("Blue")
+                "on_release": lambda: self.change_color("Blue")
             }
         ]
 
-        menu_items = [
+        themes = MDDropdownMenu(
+            items=theme_items,
+            width_mult=3,
+        )
+        themes.caller = instance
+        themes.open()
+
+    def open_menu(self, instance):
+        MDApp.get_running_app().get_main_container().open_menu()
+
+    def open_sort_menu(self, instance):
+        sort_items = [
             {
                 "text": "01.01.01 - 02.02.02",
                 "left_icon": "sort-calendar-descending",
@@ -406,29 +415,13 @@ class ToolBar(MDBoxLayout):
                 "on_release": self.without_sort
             }
         ]
-        self.sort_menu = MDDropdownMenu(
-            items=menu_items,
+
+        sort_menu = MDDropdownMenu(
+            items=sort_items,
             width_mult=5,
         )
-        self.themes = MDDropdownMenu(
-            items=theme_items,
-            width_mult=3,
-        )
-
-    def change_color(self, color):
-        MDApp.get_running_app().app_color = color
-        get_main_container().main_menu.upper.start_button.change_screen()
-
-    def open_theme_menu(self, instance):
-        self.themes.caller = instance
-        self.themes.open()
-
-    def open_menu(self, instance):
-        MDApp.get_running_app().get_main_container().open_menu()
-
-    def open_sort_menu(self, instance):
-        self.sort_menu.caller = instance
-        self.sort_menu.open()
+        sort_menu.caller = instance
+        sort_menu.open()
 
     def sort_task_important_up(self):
         get_screen_manager().current_screen.sort_task_important_up()
