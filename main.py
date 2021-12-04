@@ -94,16 +94,16 @@ class TasksMenuDrawer(MDNavigationDrawer):
         self.priority_label.text = "Приоритетность " + priority
 
     def open_priority_menu(self, instance):
-        menu_items = [
+        priority_items = [
             {
-                "text": "Очень важная",
+                "text": "Очень высокая",
                 "viewclass": "OneLineListItem",
-                "on_release": lambda: self.set_priority("Очень важная")
+                "on_release": lambda: self.set_priority("Очень высокая")
             },
             {
-                "text": "Важная",
+                "text": "Высокая",
                 "viewclass": "OneLineListItem",
-                "on_release": lambda: self.set_priority("Важная")
+                "on_release": lambda: self.set_priority("Высокая")
             },
             {
                 "text": "Обычная",
@@ -122,13 +122,13 @@ class TasksMenuDrawer(MDNavigationDrawer):
             }
         ]
 
-        menu = MDDropdownMenu(
-            items=menu_items,
+        priority_menu = MDDropdownMenu(
+            items=priority_items,
             width_mult=3,
         )
 
-        menu.caller = instance
-        menu.open()
+        priority_menu.caller = instance
+        priority_menu.open()
 
 
 class TasksScreen(MDScreen):
@@ -172,17 +172,14 @@ class TasksScreen(MDScreen):
     def delete_all_tasks(self):
         self.tasks.clear_widgets()
 
-    def sort_tasks_alphabet(self):
-        # SORT ALFABET
-        new_tasks_text = sorted([task.get_text() for task in self.get_tasks()])
-        new_tasks = []
-        for label in new_tasks_text:
-            for task in self.get_tasks():
-                if task.get_text() == label and task not in new_tasks:
-                    new_tasks.append(task)
+    def without_sort(self):
+        self.reload()
 
+    def sort_tasks_alphabet(self):
+        alphabetically_sorted_tasks = sorted([task for task in self.get_tasks()], key=lambda task: task.get_text(),
+                                             reverse=True)
         self.delete_all_tasks()
-        self.import_tasks(new_tasks[::-1])
+        self.import_tasks(alphabetically_sorted_tasks)
 
     def reload(self):
         for task in get_tasks_manager().tasks:
@@ -192,40 +189,48 @@ class TasksScreen(MDScreen):
             self.import_tasks(self.get_tasks())
 
     def sort_tasks_alphabet_reversed(self):
-        # SORT ALFABET
-        new_tasks_text = sorted([task.get_text() for task in self.get_tasks()])
-        new_tasks = []
-        for label in new_tasks_text:
-            for task in self.get_tasks():
-                if task.get_text() == label and task not in new_tasks:
-                    new_tasks.append(task)
-
+        alphabetically_sorted_tasks = sorted([task for task in self.get_tasks()], key=lambda task: task.get_text())
         self.delete_all_tasks()
-        self.import_tasks(new_tasks)
+        self.import_tasks(alphabetically_sorted_tasks)
+
+    def sort_deadline(self):
+        tasks_with_deadline = [task for task in self.get_tasks() if task.deadline]
+        tasks_without_deadline = [task for task in self.get_tasks() if not task.deadline]
+        sorted_by_deadline_tasks = sorted(tasks_with_deadline,
+                                          key=lambda task: datetime.datetime.strptime(task.deadline, "%Y-%m-%d").date(),
+                                          reverse=True)
+        self.delete_all_tasks()
+        self.import_tasks(sorted_by_deadline_tasks + tasks_without_deadline)
+
+    def sort_deadline_reversed(self):
+        tasks_with_deadline = [task for task in self.get_tasks() if task.deadline]
+        tasks_without_deadline = [task for task in self.get_tasks() if not task.deadline]
+        sorted_by_deadline_tasks = sorted(tasks_with_deadline,
+                                          key=lambda task: datetime.datetime.strptime(task.deadline, "%Y-%m-%d").date())
+        self.delete_all_tasks()
+        self.import_tasks(tasks_without_deadline + sorted_by_deadline_tasks)
+
+    def sort_priority(self):
+        sorted_by_priority_tasks = sorted([task for task in self.get_tasks()], key=lambda task: task.priority,
+                                          reverse=True)
+        self.delete_all_tasks()
+        self.import_tasks(sorted_by_priority_tasks)
+
+    def sort_priority_reversed(self):
+        sorted_by_priority_tasks = sorted([task for task in self.get_tasks()], key=lambda task: task.priority)
+        self.delete_all_tasks()
+        self.import_tasks(sorted_by_priority_tasks)
 
     def sort_task_important_up(self):
-        tasks_important = []
-        tasks_NOT_important = []
-        for task in self.get_tasks():
-            if task.is_important:
-                tasks_important.append(task)
-            elif not task.is_important:
-                tasks_NOT_important.append(task)
-        new_task = tasks_important + tasks_NOT_important
+        sorted_by_importance_tasks = sorted([task for task in self.get_tasks()], key=lambda task: task.is_important)
         self.delete_all_tasks()
-        self.import_tasks(new_task[::-1])
+        self.import_tasks(sorted_by_importance_tasks)
 
     def sort_task_important_down(self):
-        tasks_important = []
-        tasks_NOT_important = []
-        for task in self.get_tasks():
-            if task.is_important:
-                tasks_important.append(task)
-            elif not task.is_important:
-                tasks_NOT_important.append(task)
-        new_task = tasks_NOT_important + tasks_important
+        sorted_by_importance_tasks = sorted([task for task in self.get_tasks()], key=lambda task: task.is_important,
+                                            reverse=True)
         self.delete_all_tasks()
-        self.import_tasks(new_task[::-1])
+        self.import_tasks(sorted_by_importance_tasks)
 
 
 def get_current_screen() -> TasksScreen:
@@ -295,11 +300,19 @@ class Task(MDBoxLayout):
     def repaint(self):
         for child in self.canvas.children:
             if isinstance(child, Color):
-                if self.is_done and child.rgba == [int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][:2], 16) / 255, int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][2:4], 16) / 255, int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][4:], 16) / 255] + [1]:
+                if self.is_done and child.rgba == [
+                    int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][:2], 16) / 255,
+                    int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][2:4], 16) / 255,
+                    int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][4:],
+                        16) / 255] + [1]:
                     child.rgba = [0.39, 0.39, 0.39, 1]
                     return
                 if not self.is_done and child.rgba == [0.39, 0.39, 0.39, 1]:
-                    child.rgba = [int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][:2], 16) / 255, int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][2:4], 16) / 255, int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][4:], 16) / 255] + [1]
+                    child.rgba = [int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][:2],
+                                      16) / 255, int(
+                        MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][2:4], 16) / 255,
+                                  int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][4:],
+                                      16) / 255] + [1]
                     return
 
     def get_text(self):
@@ -311,86 +324,116 @@ class Task(MDBoxLayout):
     def set_deadline(self, new_deadline):
         self.deadline = new_deadline
 
+    def get_deadline(self):
+        return self.deadline
+
 
 class ToolBar(MDBoxLayout):
     search_text_field: MDTextField = ObjectProperty()
     left_toolbar: MDToolbar = ObjectProperty()
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        theme_items = [
-            {
-                "text": "Розовая",
-                "viewclass": "OneLineListItem",
-                "on_press": lambda: self.change_color("Pink")
-            },
-            {
-                "text": "Оранжевая",
-                "viewclass": "OneLineListItem",
-                "on_press": lambda: self.change_color("Orange")
-            },
-            {
-                "text": "Фиолетовая",
-                "viewclass": "OneLineListItem",
-                "on_press": lambda: self.change_color("Purple")
-            },
-            {
-                "text": "Синяя",
-                "viewclass": "OneLineListItem",
-                "on_press": lambda: self.change_color("Blue")
-            }
-        ]
-
-        menu_items = [
-            {
-                "text": "Сортировка по алфавиту",
-                "left_icon": "sort-alphabetical-ascending",
-                "viewclass": "RightContentCls",
-                "on_release": self.do_sort_tasks_alphabet
-            },
-            {
-                "text": "Обратная сортировка по алфавиту",
-                "left_icon": "sort-alphabetical-descending",
-                "viewclass": "RightContentCls",
-                "on_release": self.sort_tasks_alphabet_reversed
-            },
-            {
-                "text": "Сортировка по важности",
-                "left_icon": "sort-alphabetical-descending",
-                "viewclass": "RightContentCls",
-                "on_release": self.sort_task_important_up
-            },
-            {
-                "text": "Обратная сортировка по важности",
-                "left_icon": "sort-alphabetical-descending",
-                "viewclass": "RightContentCls",
-                "on_release": self.sort_task_important_down
-            }
-        ]
-        self.sort_menu = MDDropdownMenu(
-            items=menu_items,
-            width_mult=7,
-        )
-        self.themes = MDDropdownMenu(
-            items=theme_items,
-            width_mult=3,
-        )
 
     def change_color(self, color):
         MDApp.get_running_app().app_color = color
         get_main_container().main_menu.upper.start_button.change_screen()
 
     def open_theme_menu(self, instance):
-        self.themes.caller = instance
-        self.themes.open()
+        theme_items = [
+            {
+                "text": "Розовая",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda: self.change_color("Pink")
+            },
+            {
+                "text": "Оранжевая",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda: self.change_color("Orange")
+            },
+            {
+                "text": "Фиолетовая",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda: self.change_color("Purple")
+            },
+            {
+                "text": "Синяя",
+                "viewclass": "OneLineListItem",
+                "on_release": lambda: self.change_color("Blue")
+            }
+        ]
+
+        themes = MDDropdownMenu(
+            items=theme_items,
+            width_mult=3,
+        )
+        themes.caller = instance
+        themes.open()
 
     def open_menu(self, instance):
         MDApp.get_running_app().get_main_container().open_menu()
 
     def open_sort_menu(self, instance):
-        self.sort_menu.caller = instance
-        self.sort_menu.open()
+        sort_items = [
+            {
+                "text": "01.01.01 - 02.02.02",
+                "left_icon": "sort-calendar-descending",
+                "viewclass": "RightContentCls",
+                "on_release": self.sort_deadline
+            },
+            {
+                "text": "02.02.02 - 01.01.01",
+                "left_icon": "sort-calendar-ascending",
+                "viewclass": "RightContentCls",
+                "on_release": self.sort_deadline_reversed
+            },
+            {
+                "text": "1 - 5",
+                "left_icon": "sort-numeric-ascending",
+                "viewclass": "RightContentCls",
+                "on_release": self.sort_priority
+            },
+            {
+                "text": "5 - 1",
+                "left_icon": "sort-numeric-descending",
+                "viewclass": "RightContentCls",
+                "on_release": self.sort_priority_reversed
+            },
+            {
+                "text": "Важно - Не важно",
+                "left_icon": "sort-bool-descending",
+                "viewclass": "RightContentCls",
+                "on_release": self.sort_task_important_up
+            },
+            {
+                "text": "Не важно - Важно",
+                "left_icon": "sort-bool-ascending",
+                "viewclass": "RightContentCls",
+                "on_release": self.sort_task_important_down
+            },
+            {
+                "text": "А - Я",
+                "left_icon": "sort-alphabetical-ascending",
+                "viewclass": "RightContentCls",
+                "on_release": self.do_sort_tasks_alphabet
+            },
+            {
+                "text": "Я - А",
+                "left_icon": "sort-alphabetical-descending",
+                "viewclass": "RightContentCls",
+                "on_release": self.sort_tasks_alphabet_reversed
+            },
+            {
+                "text": "По умолчанию",
+                "left_icon": "window-close",
+                "viewclass": "RightContentCls",
+                "on_release": self.without_sort
+            }
+        ]
+
+        sort_menu = MDDropdownMenu(
+            items=sort_items,
+            width_mult=5,
+        )
+        sort_menu.caller = instance
+        sort_menu.open()
 
     def sort_task_important_up(self):
         get_screen_manager().current_screen.sort_task_important_up()
@@ -406,6 +449,21 @@ class ToolBar(MDBoxLayout):
 
     def search_task(self):
         get_screen_manager().current_screen.search_task()
+
+    def without_sort(self):
+        get_screen_manager().current_screen.without_sort()
+
+    def sort_deadline(self):
+        get_screen_manager().current_screen.sort_deadline()
+
+    def sort_deadline_reversed(self):
+        get_screen_manager().current_screen.sort_deadline_reversed()
+
+    def sort_priority(self):
+        get_screen_manager().current_screen.sort_priority()
+
+    def sort_priority_reversed(self):
+        get_screen_manager().current_screen.sort_priority_reversed()
 
 
 class MenuButton(OneLineIconListItem):
