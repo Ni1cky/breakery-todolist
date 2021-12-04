@@ -197,8 +197,8 @@ class TasksScreen(MDScreen):
         tasks_with_deadline = [task for task in self.get_tasks() if task.deadline]
         tasks_without_deadline = [task for task in self.get_tasks() if not task.deadline]
         sorted_by_deadline_tasks = sorted(tasks_with_deadline,
-                                      key=lambda task: datetime.datetime.strptime(task.deadline, "%Y-%m-%d").date(),
-                                      reverse=True)
+                                          key=lambda task: datetime.datetime.strptime(task.deadline, "%Y-%m-%d").date(),
+                                          reverse=True)
         self.delete_all_tasks()
         self.import_tasks(sorted_by_deadline_tasks + tasks_without_deadline)
 
@@ -206,7 +206,7 @@ class TasksScreen(MDScreen):
         tasks_with_deadline = [task for task in self.get_tasks() if task.deadline]
         tasks_without_deadline = [task for task in self.get_tasks() if not task.deadline]
         sorted_by_deadline_tasks = sorted(tasks_with_deadline,
-                                      key=lambda task: datetime.datetime.strptime(task.deadline, "%Y-%m-%d").date())
+                                          key=lambda task: datetime.datetime.strptime(task.deadline, "%Y-%m-%d").date())
         self.delete_all_tasks()
         self.import_tasks(tasks_without_deadline + sorted_by_deadline_tasks)
 
@@ -300,11 +300,19 @@ class Task(MDBoxLayout):
     def repaint(self):
         for child in self.canvas.children:
             if isinstance(child, Color):
-                if self.is_done and child.rgba == [int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][:2], 16) / 255, int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][2:4], 16) / 255, int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][4:], 16) / 255] + [1]:
+                if self.is_done and child.rgba == [
+                    int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][:2], 16) / 255,
+                    int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][2:4], 16) / 255,
+                    int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][4:],
+                        16) / 255] + [1]:
                     child.rgba = [0.39, 0.39, 0.39, 1]
                     return
                 if not self.is_done and child.rgba == [0.39, 0.39, 0.39, 1]:
-                    child.rgba = [int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][:2], 16) / 255, int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][2:4], 16) / 255, int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][4:], 16) / 255] + [1]
+                    child.rgba = [int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][:2],
+                                      16) / 255, int(
+                        MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][2:4], 16) / 255,
+                                  int(MDApp.get_running_app().all_colors[MDApp.get_running_app().app_color]['A200'][4:],
+                                      16) / 255] + [1]
                     return
 
     def get_text(self):
