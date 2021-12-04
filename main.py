@@ -96,12 +96,12 @@ class TasksMenuDrawer(MDNavigationDrawer):
     def open_priority_menu(self, instance):
         menu_items = [
             {
-                "text": "Очень важная",
+                "text": "Очень высокая",
                 "viewclass": "OneLineListItem",
                 "on_release": lambda: self.set_priority("Очень высокая")
             },
             {
-                "text": "Важная",
+                "text": "Высокая",
                 "viewclass": "OneLineListItem",
                 "on_release": lambda: self.set_priority("Высокая")
             },
@@ -176,24 +176,14 @@ class TasksScreen(MDScreen):
     def delete_all_tasks(self):
         self.tasks.clear_widgets()
 
-    def sort_return(self):
-        if self.not_sorted != []:
-            self.delete_all_tasks()
-            self.import_tasks(self.not_sorted)
+    def without_sort(self):
+        self.reload()
 
     def sort_tasks_alphabet(self):
-        # SORT ALFABET
-        if self.not_sorted == []:
-            self.not_sorted = self.get_tasks()
-        new_tasks_text = sorted([task.get_text() for task in self.get_tasks()])
-        new_tasks = []
-        for label in new_tasks_text:
-            for task in self.get_tasks():
-                if task.get_text() == label and task not in new_tasks:
-                    new_tasks.append(task)
-
+        alphabetically_sorted_tasks = sorted([task for task in self.get_tasks()], key=lambda task: task.get_text(),
+                                             reverse=True)
         self.delete_all_tasks()
-        self.import_tasks(new_tasks[::-1])
+        self.import_tasks(alphabetically_sorted_tasks)
 
     def reload(self):
         for task in get_tasks_manager().tasks:
@@ -203,118 +193,44 @@ class TasksScreen(MDScreen):
             self.import_tasks(self.get_tasks())
 
     def sort_tasks_alphabet_reversed(self):
-        if self.not_sorted == []:
-            self.not_sorted = self.get_tasks()        # SORT ALFABET
-        new_tasks_text = sorted([task.get_text() for task in self.get_tasks()])
-        new_tasks = []
-        for label in new_tasks_text:
-            for task in self.get_tasks():
-                if task.get_text() == label and task not in new_tasks:
-                    new_tasks.append(task)
-
+        alphabetically_sorted_tasks = sorted([task for task in self.get_tasks()], key=lambda task: task.get_text())
         self.delete_all_tasks()
-        self.import_tasks(new_tasks)
+        self.import_tasks(alphabetically_sorted_tasks)
 
     def sort_deadline(self):
-        if self.not_sorted == []:
-            self.not_sorted = self.get_tasks()
-        dates = [task.get_deadline() for task in self.get_tasks()]
-        task_dates = [date for date in dates if date != '']
-        task_dates.sort()
-        task_to_scr_last = []
-        task_to_scr = []
-        for date in task_dates:
-            for task in self.get_tasks():
-                if date == task.get_deadline() and task not in task_to_scr:
-                    task_to_scr.append(task)
-                elif task.get_deadline() == '' and task not in task_to_scr_last:
-                    task_to_scr_last.append(task)
+        sorted_by_date_tasks = sorted([task for task in self.get_tasks()],
+                                      key=lambda task: datetime.datetime.strptime(task.deadline, "%Y-%m-%d").date(),
+                                      reverse=True)
         self.delete_all_tasks()
-        self.import_tasks((task_to_scr + task_to_scr_last)[::-1])
+        self.import_tasks(sorted_by_date_tasks)
 
     def sort_deadline_reversed(self):
-        if self.not_sorted == []:
-            self.not_sorted = self.get_tasks()
-        dates = [task.get_deadline() for task in self.get_tasks()]
-        task_dates = [date for date in dates if date != '']
-        task_dates.sort()
-        task_to_scr_last = []
-        task_to_scr = []
-        for date in task_dates:
-            for task in self.get_tasks():
-                if date == task.get_deadline() and task not in task_to_scr:
-                    task_to_scr.append(task)
-                elif task.get_deadline() == '' and task not in task_to_scr_last:
-                    task_to_scr_last.append(task)
+        sorted_by_date_tasks = sorted([task for task in self.get_tasks()],
+                                      key=lambda task: datetime.datetime.strptime(task.deadline, "%Y-%m-%d").date())
         self.delete_all_tasks()
-        self.import_tasks(task_to_scr + task_to_scr_last)
+        self.import_tasks(sorted_by_date_tasks)
 
     def sort_priority(self):
-        if self.not_sorted == []:
-            self.not_sorted = self.get_tasks()
-        pr_1, pr_2, pr_3, pr_4, pr_5 = [], [], [], [], []
-        for task in self.get_tasks():
-            if task.priority == 1:
-                pr_1.append(task)
-            if task.priority == 2:
-                pr_2.append(task)
-            if task.priority == 3:
-                pr_3.append(task)
-            if task.priority == 4:
-                pr_4.append(task)
-            if task.priority == 5:
-                pr_5.append(task)
-        new_task = pr_1 + pr_2 + pr_3 + pr_4 + pr_4
+        sorted_by_priority_tasks = sorted([task for task in self.get_tasks()], key=lambda task: task.priority,
+                                          reverse=True)
         self.delete_all_tasks()
-        self.import_tasks(new_task[::-1])
+        self.import_tasks(sorted_by_priority_tasks)
 
     def sort_priority_reversed(self):
-        if self.not_sorted == []:
-            self.not_sorted = self.get_tasks()
-        pr_1, pr_2, pr_3, pr_4, pr_5 = [], [], [], [], []
-        for task in self.get_tasks():
-            if task.priority == 1:
-                pr_1.append(task)
-            if task.priority == 2:
-                pr_2.append(task)
-            if task.priority == 3:
-                pr_3.append(task)
-            if task.priority == 4:
-                pr_4.append(task)
-            if task.priority == 5:
-                pr_5.append(task)
-        new_task = pr_1 + pr_2 + pr_3 + pr_4 + pr_4
+        sorted_by_priority_tasks = sorted([task for task in self.get_tasks()], key=lambda task: task.priority)
         self.delete_all_tasks()
-        self.import_tasks(new_task)
-
+        self.import_tasks(sorted_by_priority_tasks)
 
     def sort_task_important_up(self):
-        if self.not_sorted == []:
-            self.not_sorted = self.get_tasks()
-        tasks_important = []
-        tasks_NOT_important = []
-        for task in self.get_tasks():
-            if task.is_important:
-                tasks_important.append(task)
-            elif not task.is_important:
-                tasks_NOT_important.append(task)
-        new_task = tasks_important + tasks_NOT_important
+        sorted_by_importance_tasks = sorted([task for task in self.get_tasks()], key=lambda task: task.is_important)
         self.delete_all_tasks()
-        self.import_tasks(new_task[::-1])
+        self.import_tasks(sorted_by_importance_tasks)
 
     def sort_task_important_down(self):
-        if self.not_sorted == []:
-            self.not_sorted = self.get_tasks()
-        tasks_important = []
-        tasks_NOT_important = []
-        for task in self.get_tasks():
-            if task.is_important:
-                tasks_important.append(task)
-            elif not task.is_important:
-                tasks_NOT_important.append(task)
-        new_task = tasks_NOT_important + tasks_important
+        sorted_by_importance_tasks = sorted([task for task in self.get_tasks()], key=lambda task: task.is_important,
+                                            reverse=True)
         self.delete_all_tasks()
-        self.import_tasks(new_task[::-1])
+        self.import_tasks(sorted_by_importance_tasks)
 
 
 def get_current_screen() -> TasksScreen:
@@ -437,13 +353,13 @@ class ToolBar(MDBoxLayout):
         menu_items = [
             {
                 "text": "01.01.01 - 02.02.02",
-                "left_icon": "sort-calendar-ascending",
+                "left_icon": "sort-calendar-descending",
                 "viewclass": "RightContentCls",
                 "on_release": self.sort_deadline
             },
             {
                 "text": "02.02.02 - 01.01.01",
-                "left_icon": "sort-calendar-descending",
+                "left_icon": "sort-calendar-ascending",
                 "viewclass": "RightContentCls",
                 "on_release": self.sort_deadline_reversed
             },
@@ -487,7 +403,7 @@ class ToolBar(MDBoxLayout):
                 "text": "По умолчанию",
                 "left_icon": "window-close",
                 "viewclass": "RightContentCls",
-                "on_release": self.sort_return
+                "on_release": self.without_sort
             }
         ]
         self.sort_menu = MDDropdownMenu(
@@ -529,8 +445,8 @@ class ToolBar(MDBoxLayout):
     def search_task(self):
         get_screen_manager().current_screen.search_task()
 
-    def sort_return(self):
-        get_screen_manager().current_screen.sort_return()
+    def without_sort(self):
+        get_screen_manager().current_screen.without_sort()
 
     def sort_deadline(self):
         get_screen_manager().current_screen.sort_deadline()
