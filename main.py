@@ -194,17 +194,21 @@ class TasksScreen(MDScreen):
         self.import_tasks(alphabetically_sorted_tasks)
 
     def sort_deadline(self):
-        sorted_by_date_tasks = sorted([task for task in self.get_tasks()],
+        tasks_with_deadline = [task for task in self.get_tasks() if task.deadline]
+        tasks_without_deadline = [task for task in self.get_tasks() if not task.deadline]
+        sorted_by_deadline_tasks = sorted(tasks_with_deadline,
                                       key=lambda task: datetime.datetime.strptime(task.deadline, "%Y-%m-%d").date(),
                                       reverse=True)
         self.delete_all_tasks()
-        self.import_tasks(sorted_by_date_tasks)
+        self.import_tasks(sorted_by_deadline_tasks + tasks_without_deadline)
 
     def sort_deadline_reversed(self):
-        sorted_by_date_tasks = sorted([task for task in self.get_tasks()],
+        tasks_with_deadline = [task for task in self.get_tasks() if task.deadline]
+        tasks_without_deadline = [task for task in self.get_tasks() if not task.deadline]
+        sorted_by_deadline_tasks = sorted(tasks_with_deadline,
                                       key=lambda task: datetime.datetime.strptime(task.deadline, "%Y-%m-%d").date())
         self.delete_all_tasks()
-        self.import_tasks(sorted_by_date_tasks)
+        self.import_tasks(tasks_without_deadline + sorted_by_deadline_tasks)
 
     def sort_priority(self):
         sorted_by_priority_tasks = sorted([task for task in self.get_tasks()], key=lambda task: task.priority,
